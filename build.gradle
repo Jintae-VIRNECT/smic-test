@@ -1,0 +1,60 @@
+plugins {
+	id 'org.springframework.boot' version '2.5.10'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+group = 'com.example.smic'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	
+	implementation 'org.springframework.data:spring-data-envers'
+
+	// opc ua client
+	implementation 'org.eclipse.milo:sdk-client:0.6.3'
+
+	// mq
+	implementation 'org.apache.kafka:kafka-clients:2.8.0'
+
+	// utils
+	implementation 'org.apache.commons:commons-lang3:3.12.0'
+
+	// api doc
+	//implementation 'io.springfox:springfox-swagger2:3.0.0'
+	//implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'mysql:mysql-connector-java'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	//unit test
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
+	testImplementation 'org.mockito:mockito-core:3.2.4'
+	testImplementation 'org.mockito:mockito-junit-jupiter:3.2.4'
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
