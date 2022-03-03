@@ -59,7 +59,14 @@ public class ConnectionPoolImpl implements ConnectionPool {
             logConnectionStatus("getConnection");
             return client;
         }else {
-            throw new RuntimeException("no connection available.");
+            // if(usedConnection.size() < INITIAL_POOL_SIZE){
+            //     log.warn("addtional connection created after startup");
+            //     OpcUaClient client = createConnection();
+            //     connectionPool.add(Optional.ofNullable(client));
+            //     return getConnection();
+            // } else{
+                throw new NoConnectionAvailableException("no connection available.");
+            // }
         }
     }
 

@@ -1,9 +1,7 @@
 package com.virnect.smic.daemon.config.support;
 
 import java.util.List;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -26,6 +24,7 @@ import com.virnect.smic.common.data.domain.JobExecution;
 import com.virnect.smic.common.data.domain.Tag;
 import com.virnect.smic.common.data.domain.Task;
 import com.virnect.smic.common.data.domain.TaskExecution;
+import com.virnect.smic.daemon.config.annotation.OpcUaConnection;
 import com.virnect.smic.daemon.config.connection.ConnectionPoolImpl;
 import com.virnect.smic.daemon.service.ReadServiceCallable;
 import com.virnect.smic.daemon.service.ReadServiceRunnable;
@@ -36,7 +35,7 @@ import com.virnect.smic.daemon.thread.NamedExceptionHandlingThreadFactory;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class SimpleTaskLauncher implements TaskLauncher, DisposableBean {
+public class SimpleTaskLauncher implements DisposableBean {
 
 	private final TaskRepository taskRepository;
 	private final TagRepository tagRepository;
@@ -45,37 +44,30 @@ public class SimpleTaskLauncher implements TaskLauncher, DisposableBean {
 
 	private  ConnectionPoolImpl pool;
 
-	@Override
-	public TaskExecution run(JobExecution jobExecution) {
+	@OpcUaConnection
+	public TaskExecution run(OpcUaClient client, JobExecution jobExecution) {
 
 		List<Task> tasks = taskRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
 
-		// tasks = tasks.stream()
-		// 	.filter(task -> task.getId() < 3)
-		// 	.collect(Collectors.toList());
+		int numOfCores = Runtime.getRuntime().availableProcessors();
+		log.debug("************** number of cors: "+ numOfCores);
+		//  tasks = tasks.stream()
+		//  	.filter(task -> task.getId() < numOfCores+1)
+		//  	.collect(Collectors.toList());
 
-
-		pool = ConnectionPoolImpl.getInstance();
-		OpcUaClient client = pool.getConnection();
+		runScheduledFixedDelay(tasks, client);
+		// runOneTimeWithTaskExec(tasks, client);
 		
-
-		//runScheduledFixedDelay(tasks, client);
-		//runOneTimeWithTaskExec(tasks, client);
-		
-		
-
-		pool.releaseConnection(client);
-
 		return null;
 	}
 
 	private void runOneTimeWithTaskExec(List<Task> tasks, OpcUaClient client){
-		ExecutorService execService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
+		ExecutorService execService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		List<Tag> tags = tagRepository.findAll();
 
 		tasks.parallelStream().forEach(task -> {
 			//List<Tag> tags = tagRepository.findByTaskId(task.getId());
-			List<Tag> targetTags = tags.stream().filter(tag -> tag.getTask().getId().equals(task.getId())).toList();
+			List<Tag> targetTags = tags.stream().filter(tag -> tag.getTask().getId().equals(task.getId())).collect(Collectors.toList());
 			ReadServiceCallable t = new ReadServiceCallable(tasklet, targetTags, client, producerManager);
 			log.info("task start: "+ task.getName());
 			StopWatch watcher = new StopWatch();
@@ -99,7 +91,8 @@ public class SimpleTaskLauncher implements TaskLauncher, DisposableBean {
 	private void runScheduledFixedDelay(List<Task> tasks, OpcUaClient client){
 		
 		ScheduledExecutorService execService
-			= Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors()*2,new NamedExceptionHandlingThreadFactory("read-task1"));
+			= Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors()
+						,new NamedExceptionHandlingThreadFactory("read-task1"));
 
 		List<Tag> tags = tagRepository.findAll();
 

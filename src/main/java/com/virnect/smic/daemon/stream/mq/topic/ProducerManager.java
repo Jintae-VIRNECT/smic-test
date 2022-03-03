@@ -15,7 +15,9 @@ import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @Getter @Setter
 public class ProducerManager {
@@ -58,7 +60,7 @@ public class ProducerManager {
 				RecordMetadata metadata = producer.send(record).get();
 
 				long elapsedTime = System.currentTimeMillis() - time;
-				System.out.printf("sent record(key=%s value=%s) " +
+				log.debug("sent record(key=%s value=%s) " +
 						"meta(partition=%d, offset=%d) time=%d\n",
 					record.key(), record.value(), metadata.partition(),
 					metadata.offset(), elapsedTime);

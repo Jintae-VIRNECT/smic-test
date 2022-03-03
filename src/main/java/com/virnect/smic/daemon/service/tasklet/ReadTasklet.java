@@ -4,6 +4,7 @@ import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -29,7 +30,6 @@ public class ReadTasklet {
 		this.nodeId = nodeId;
 	}
 
-	//@OpcUaConnection
 	public void setClient(OpcUaClient client){
 		this.client = client;
 	}
@@ -44,7 +44,7 @@ public class ReadTasklet {
 				.get();
 			Object message = value.getValue().getValue();
 			if(message != null) {
-				log.info("{} -> {}", nodeId, message);
+				log.debug("{} -> {}", nodeId, message);
 				if(producerManager != null)
 					producerManager.runProducer(1, nodeId.replaceAll(" ", ""), message.toString());
 				return message.toString();	

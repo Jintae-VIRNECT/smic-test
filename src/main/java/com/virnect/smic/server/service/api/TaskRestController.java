@@ -2,9 +2,9 @@ package com.virnect.smic.server.service.api;
 
 import com.virnect.smic.server.data.dto.response.ApiResponse;
 import com.virnect.smic.server.data.dto.response.TagValueListResponse;
-import com.virnect.smic.server.data.dto.response.TagValueResponse;
 import com.virnect.smic.server.service.application.TaskService;
 
+import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,13 +29,15 @@ public class TaskRestController {
     private final TaskService taskService;
     private static final String TAG = TaskRestController.class.getSimpleName();
 
+    private OpcUaClient client;
+
     @GetMapping("{id}/tags/values")
     @Operation(summary="lookup tag value of task", description = "lookup tag values which belongs to provided task id")
     public ResponseEntity<EntityModel<ApiResponse<TagValueListResponse>>> getTaskTagValues(
         @PathVariable(name = "id") Long id
     ){
 
-        TagValueListResponse responseData = taskService.getTagValues(id);
+        TagValueListResponse responseData = taskService.getTagValues(client, id);
 
         EntityModel<ApiResponse<TagValueListResponse>> model
 			= EntityModel.of(new ApiResponse<>(responseData))

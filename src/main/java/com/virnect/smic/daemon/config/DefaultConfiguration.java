@@ -1,5 +1,6 @@
 package com.virnect.smic.daemon.config;
 
+import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +31,8 @@ public class DefaultConfiguration implements InitializingBean {
 	private final TopicManager topicManager;
 
 	private JobExecution jobExecution;
+	private OpcUaClient client;
+	
 	//temp
     @Bean (name="tagFiles")
 	@ConfigurationProperties(prefix = "resource.tag.file")
@@ -58,11 +61,12 @@ public class DefaultConfiguration implements InitializingBean {
 	}
 
 	@Override
-	public void afterPropertiesSet() {
+	public void afterPropertiesSet() throws InterruptedException {
 		Assert.state(jobExecution != null, "A jobExecution has not been set.");
+		Thread.sleep(1000);
 		try {
 			topicManager.create();
-			simpleTaskLauncher.run(jobExecution);
+			simpleTaskLauncher.run(client, jobExecution);
 		} catch (Exception e) {
 			throw new ConfigurationException(e);
 		}
