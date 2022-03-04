@@ -1,4 +1,4 @@
-package com.virnect.smic.daemon.stream.mq.topic;
+package com.virnect.smic.daemon.mq.kafka;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import com.virnect.smic.common.data.dao.TagRepository;
+import com.virnect.smic.daemon.mq.TopicManager;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -19,7 +20,6 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.config.TopicConfig;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +28,18 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Setter @Getter
-@Component
 @RequiredArgsConstructor
-public class TopicManager {
+public class KafkaTopicManager implements TopicManager {
 
 	private final Environment env;
 	private final TagRepository tagRepository;
 
-	private List<String> tags;
+	//private List<String> tags;
+
+	// public KafkaTopicManager(TagRepository tagRepository, Environment env) {
+	// 	super(tagRepository);
+	// 	this.env = env;
+	// }
 
 	public void create() throws ExecutionException, InterruptedException {
 		Properties config = new Properties();
@@ -50,7 +54,7 @@ public class TopicManager {
 
 		List<NewTopic> topicList = new ArrayList<NewTopic>();
 
-		tags = getTagList();
+		List<String> tags = getTagList();
 
 		tags.forEach(item->{
 			boolean contains = names.contains(item);
@@ -68,7 +72,6 @@ public class TopicManager {
 
 		CreateTopicsResult result = admin.createTopics(topicList);
 		log.info("result");
-
 	}
 
 	private List<String> getTagList(){

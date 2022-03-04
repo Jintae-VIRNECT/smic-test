@@ -4,7 +4,6 @@ import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -13,18 +12,19 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import com.virnect.smic.common.data.domain.Tag;
-import com.virnect.smic.daemon.stream.mq.topic.ProducerManager;
+import com.virnect.smic.daemon.mq.ProducerManager;
+import com.virnect.smic.daemon.mq.kafka.KafkaProducerManager;
+import com.virnect.smic.daemon.mq.rabbitmq.RabbitMqProducerManager;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
 @Getter @Setter
 public class ReadTasklet {
-
 	private OpcUaClient client;
 	private String nodeId;
 	private Tag tag;
-	private ProducerManager producerManager;
+	private final ProducerManager producerManager = new RabbitMqProducerManager(); //new KafkaProducerManager();
 
 	public ReadTasklet(String nodeId){
 		this.nodeId = nodeId;
@@ -44,7 +44,7 @@ public class ReadTasklet {
 				.get();
 			Object message = value.getValue().getValue();
 			if(message != null) {
-				log.debug("{} -> {}", nodeId, message);
+				log.info("{} -> {}", nodeId, message);
 				if(producerManager != null)
 					producerManager.runProducer(1, nodeId.replaceAll(" ", ""), message.toString());
 				return message.toString();	

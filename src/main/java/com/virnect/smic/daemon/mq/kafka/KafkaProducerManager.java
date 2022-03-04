@@ -1,7 +1,10 @@
-package com.virnect.smic.daemon.stream.mq.topic;
+package com.virnect.smic.daemon.mq.kafka;
 
 
+import java.io.IOException;
 import java.util.Properties;
+
+import com.virnect.smic.daemon.mq.ProducerManager;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -11,34 +14,30 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
 @Getter @Setter
-public class ProducerManager {
+public class KafkaProducerManager implements ProducerManager {
 
-	private static Environment env;
+	//private static Environment env;
 	private static Producer<Long, String> producer;
 
-	public ProducerManager(Environment env) {
-		this.env = env;
+	public KafkaProducerManager() {
+		//this.env = env;
 		producer = createKafkaProducer();
-	}
-
-	public Producer<Long, String> getProducer(){
-		return producer;
+		
 	}
 
 	private static Producer<Long, String> createKafkaProducer() {
 		Properties props = new Properties();
 		props.put(
 			ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-			env.getProperty("kafka.host")+ ":"+ env.getProperty("kafka.port"));
+			//env.getProperty("kafka.host")+ ":"+ env.getProperty("kafka.port"));
+			"localhost:9092");
 		props.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaProducerTest1");
 		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
 			LongSerializer.class.getName());
@@ -47,8 +46,8 @@ public class ProducerManager {
 		return new KafkaProducer<>(props);
 	}
 
-	static public void runProducer(final int sendMessageCount, String topic, String value) throws Exception {
-		//final Producer<Long, String> producer = createKafkaProducer();
+	public void runProducer(final int sendMessageCount, String topic, String value) throws IOException {
+		
 		long time = System.currentTimeMillis();
 
 		try {
@@ -75,8 +74,4 @@ public class ProducerManager {
 		// }
 	}
 
-	// @Bean
-	// private Producer<Long, String> producer (){
-	// 	return createKafkaProducer();
-	// }
 }
