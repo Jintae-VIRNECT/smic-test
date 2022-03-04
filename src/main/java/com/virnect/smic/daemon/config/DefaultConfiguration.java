@@ -2,16 +2,16 @@ package com.virnect.smic.daemon.config;
 
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
-import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ import com.virnect.smic.daemon.mq.rabbitmq.RabbitMqQueueManager;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class DefaultConfiguration implements InitializingBean {
+public class DefaultConfiguration {
 	private final SimpleJobLauncher jobLauncher;
 	private final SimpleTaskLauncher simpleTaskLauncher;
 	private final TagRepository tagRepository;
@@ -53,10 +53,11 @@ public class DefaultConfiguration implements InitializingBean {
 		return new ArrayList<String>();
 	}
 
-	@PostConstruct
+	@EventListener(ApplicationReadyEvent.class)
 	public void initialize() {
 		try {
 			jobExecution =  jobLauncher.run();
+			launchTaskExecutor(jobExecution);
 		} catch (Exception e) {
 			throw new ConfigurationException(e);
 		}
@@ -66,10 +67,8 @@ public class DefaultConfiguration implements InitializingBean {
 		return jobLauncher;
 	}
 
-	@Override
-	public void afterPropertiesSet() throws InterruptedException {
-		Assert.state(jobExecution != null, "A jobExecution has not been set.");
-		Thread.sleep(1000);
+	public void launchTaskExecutor(JobExecution jobExecution) {
+		
 		try {
 			topicManager  = new RabbitMqQueueManager(tagRepository);
 			//topicManager = new KafkaTopicManager(env, tagRepository);

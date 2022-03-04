@@ -34,7 +34,7 @@ public class ReadTasklet {
 		this.client = client;
 	}
 
-	public String run() {
+	public String run(Boolean produceEnabled) {
 
 		NodeId nodeIdString  = new NodeId(2, nodeId);
 		DataValue value;
@@ -45,7 +45,7 @@ public class ReadTasklet {
 			Object message = value.getValue().getValue();
 			if(message != null) {
 				log.info("{} -> {}", nodeId, message);
-				if(producerManager != null)
+				if(produceEnabled)
 					producerManager.runProducer(1, nodeId.replaceAll(" ", ""), message.toString());
 				return message.toString();	
 			}else{
