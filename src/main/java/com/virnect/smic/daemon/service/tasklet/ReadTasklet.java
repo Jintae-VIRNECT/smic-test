@@ -44,7 +44,7 @@ public class ReadTasklet {
 				.get();
 			Object message = value.getValue().getValue();
 			if(message != null) {
-				log.info("{} -> {}", nodeId, message);
+				log.info("{} -> {}", nodeId, message.toString());
 				if(produceEnabled)
 					producerManager.runProducer(1, nodeId.replaceAll(" ", ""), message.toString());
 				return message.toString();	

@@ -34,7 +34,7 @@ public class RabbitMqProducerManager implements ProducerManager {
     }
 
     public void runProducer(int i, String queueName, String value) throws IOException {
-        producer.basicPublish("", queueName, null, value.getBytes());
+        producer.basicPublish("", queueName, null, value.getBytes("UTF-8"));
     }
     
 }

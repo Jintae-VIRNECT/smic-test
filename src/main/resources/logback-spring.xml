@@ -17,6 +17,7 @@
         <file>${LOGS}/application-${bySecond}.log</file>
         <encoder
                 class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <charset>UTF-8</charset>
             <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
         </encoder>
         <rollingPolicy
