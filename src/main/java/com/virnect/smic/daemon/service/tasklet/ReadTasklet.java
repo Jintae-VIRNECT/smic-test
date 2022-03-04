@@ -34,7 +34,7 @@ public class ReadTasklet {
 		this.client = client;
 	}
 
-	public String run(Boolean produceEnabled) {
+	public synchronized String readAndPublish() {
 
 		NodeId nodeIdString  = new NodeId(2, nodeId);
 		DataValue value;
@@ -44,9 +44,32 @@ public class ReadTasklet {
 				.get();
 			Object message = value.getValue().getValue();
 			if(message != null) {
-				log.info("{} -> {}", nodeId, message.toString());
-				if(produceEnabled)
-					producerManager.runProducer(1, nodeId.replaceAll(" ", ""), message.toString());
+				log.debug("{} -> {}", nodeId, message.toString());
+				producerManager.runProducer(1, nodeId.replaceAll(" ", ""), message.toString());
+				return message.toString();	
+			}else{
+				return "";
+			}
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("*******************  exception occurred at " +  tag.toString());
+			throw new IllegalStateException();
+		}
+	}
+
+	public synchronized String readOnly() {
+
+		NodeId nodeIdString  = new NodeId(2, nodeId);
+		DataValue value;
+		try {
+
+			value = client.readValue(0, TimestampsToReturn.Both, nodeIdString)
+				.get();
+			Object message = value.getValue().getValue();
+			if(message != null) {
+				log.debug("{} -> {}", nodeId, message.toString());
 				return message.toString();	
 			}else{
 				return "";

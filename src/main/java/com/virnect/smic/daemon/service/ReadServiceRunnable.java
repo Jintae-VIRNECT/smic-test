@@ -42,7 +42,7 @@ public class ReadServiceRunnable implements Runnable {
 					tasklet.setTag(tag);
 					tasklet.setNodeId(tag.getNodeId());
 					tasklet.setClient(client);
-					tasklet.run(true);
+					tasklet.readAndPublish();
 				});
 
 			log.info("task ends: "+ targetTagas.get(0).getTask().getName());

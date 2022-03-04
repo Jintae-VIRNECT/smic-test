@@ -53,8 +53,8 @@ public class SimpleTaskLauncher implements DisposableBean {
 		//  	.filter(task -> task.getId() < numOfCores+1)
 		//  	.collect(Collectors.toList());
 
-		//runScheduledFixedDelay(tasks, client);
-		runOneTimeWithTaskExec(tasks, client);
+		runScheduledFixedDelay(tasks, client);
+	    //runOneTimeWithTaskExec(tasks, client);
 		
 		return null;
 	}
@@ -66,7 +66,7 @@ public class SimpleTaskLauncher implements DisposableBean {
 		tasks.parallelStream().forEach(task -> {
 			//List<Tag> tags = tagRepository.findByTaskId(task.getId());
 			List<Tag> targetTags = tags.stream().filter(tag -> tag.getTask().getId().equals(task.getId())).collect(Collectors.toList());
-			ReadServiceCallable t = new ReadServiceCallable(tasklet, targetTags, client);//, producerManager);
+			ReadServiceCallable t = new ReadServiceCallable(tasklet, targetTags, client);
 			log.info("task start: "+ task.getName());
 			StopWatch watcher = new StopWatch();
 			watcher.start();
@@ -91,7 +91,7 @@ public class SimpleTaskLauncher implements DisposableBean {
 
 		List<Tag> tags = tagRepository.findAll();
 
-		ReadServiceRunnable t = new ReadServiceRunnable(tasklet, tags, tasks, client);//, producerManager);
+		ReadServiceRunnable t = new ReadServiceRunnable(tasklet, tags, tasks, client);
 		execService.scheduleWithFixedDelay(
 			t
 			, 0

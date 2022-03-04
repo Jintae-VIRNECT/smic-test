@@ -30,7 +30,7 @@ public class ReadServiceCallable implements Callable {
 			tasklet.setTag(tag);
 			tasklet.setNodeId(tag.getNodeId());
 			tasklet.setClient(client);
-			result =  tasklet.run(true);
+			result =  tasklet.readAndPublish();
 		}
 		return result;
 	}

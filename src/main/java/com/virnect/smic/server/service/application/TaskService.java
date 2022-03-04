@@ -44,7 +44,7 @@ public class TaskService {
            ReadTasklet readTasklet = new ReadTasklet();
            readTasklet.setClient(client);
            readTasklet.setNodeId(tag.getNodeId());
-           String result = readTasklet.run(false);
+           String result = readTasklet.readOnly();
            map.put(tag.getNodeId(), result);
         });
         log.info("task ends ");
