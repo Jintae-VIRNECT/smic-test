@@ -1,4 +1,4 @@
-package com.example.smic.smic;
+package com.virnect.smic;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

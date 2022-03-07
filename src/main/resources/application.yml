@@ -21,6 +21,11 @@ spring:
         use_sql_comments: false
     show-sql: true
 
+logging:
+  level:
+    root: info
+    com.virnect.smic.daemon.service.tasklet: debug
+    
 opc-server:
 #   host: 35.232.112.205
 #   port: 8932

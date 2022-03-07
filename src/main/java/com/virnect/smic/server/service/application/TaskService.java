@@ -29,6 +29,7 @@ public class TaskService {
     private TaskService self = this;
 
     private final TagRepository tagRepository;
+    private final ReadTasklet readTasklet;
 
     @OpcUaConnection
     public TagValueListResponse getTagValues(OpcUaClient client, Long taskId) {
@@ -41,9 +42,9 @@ public class TaskService {
         watcher.start();
        
        tags.parallelStream().forEach(tag->{
-           ReadTasklet readTasklet = new ReadTasklet();
-           readTasklet.setClient(client);
-           readTasklet.setNodeId(tag.getNodeId());
+           readTasklet.initiate(tag.getNodeId(), client);
+           //readTasklet.setClient(client);
+          // readTasklet.setNodeId(tag.getNodeId());
            String result = readTasklet.readOnly();
            map.put(tag.getNodeId(), result);
         });

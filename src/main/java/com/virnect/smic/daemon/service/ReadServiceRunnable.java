@@ -40,8 +40,8 @@ public class ReadServiceRunnable implements Runnable {
 			targetTagas.forEach(tag->{
 			
 					tasklet.setTag(tag);
-					tasklet.setNodeId(tag.getNodeId());
-					tasklet.setClient(client);
+					tasklet.initiate(tag.getNodeId(), client);
+					//tasklet.setClient(client);
 					tasklet.readAndPublish();
 				});
 

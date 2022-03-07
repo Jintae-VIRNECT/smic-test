@@ -28,8 +28,8 @@ public class ReadServiceCallable implements Callable {
 		for(Tag tag : tags)
 		{
 			tasklet.setTag(tag);
-			tasklet.setNodeId(tag.getNodeId());
-			tasklet.setClient(client);
+			tasklet.initiate(tag.getNodeId(), client);
+			//tasklet.setClient(client);
 			result =  tasklet.readAndPublish();
 		}
 		return result;
