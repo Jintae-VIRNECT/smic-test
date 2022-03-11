@@ -37,20 +37,11 @@ public class TaskService {
 		List<Tag> tags = tagRepository.findByTaskId(taskId);
         ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
        
-        log.info("task start ");
-        StopWatch watcher = new StopWatch();
-        watcher.start();
-       
        tags.parallelStream().forEach(tag->{
            readTasklet.initiate(tag.getNodeId(), client);
-           //readTasklet.setClient(client);
-          // readTasklet.setNodeId(tag.getNodeId());
            String result = readTasklet.readOnly();
            map.put(tag.getNodeId(), result);
         });
-        log.info("task ends ");
-        watcher.stop();
-        log.info("taime taken: "+ watcher.getTime());
 
 		PageMetadataResponse pageMeta = PagingUtils.pagingBuilder(false, null, map.size(), 1, map.size(), true);
         

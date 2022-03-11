@@ -1,17 +1,20 @@
 package com.virnect.smic.daemon.mq.rabbitmq;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.virnect.smic.common.data.dao.TagRepository;
+import com.virnect.smic.common.data.domain.Tag;
 import com.virnect.smic.daemon.mq.TopicManager;
 
-import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -23,21 +26,28 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RabbitMqQueueManager implements TopicManager{
 
-    //private final Environment env;
-	private final TagRepository tagRepository;
+    @Autowired
+	@Qualifier("tagList")
+    private final List<Tag> tagList;
 
     public void create() throws IOException, TimeoutException {
 
-        List<String> tags = getTagList();
+        List<String> tags = tagList.stream().map(o-> o.getNodeId()).collect(Collectors.toList());
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
         factory.setPort(5672);
         try (Connection connection = factory.newConnection();
             Channel channel = connection.createChannel()) {
+                
                 tags.forEach(tag-> {
                     try {
-                        channel.queueDeclare(tag.replaceAll(" ", ""), false, false, false, null);
+                        String queueName = tag.replaceAll(" ", "");
+                        channel.exchangeDeclare("amq.topic", "topic", true, false, null);
+                        Map<String, Object> args = new HashMap<String, Object>();
+                        args.put("max-length", 1);
+                        channel.queueDeclare(queueName, false, false, false, args);
+                        channel.queueBind(queueName, "amq.topic", queueName);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -46,12 +56,5 @@ public class RabbitMqQueueManager implements TopicManager{
            // channel.close();
         }
     }
-    
-    private List<String> getTagList(){
-		return tagRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
-			.stream()
-			.map(o-> o.getNodeId())
-			.collect(Collectors.toList());
 
-	}
 }

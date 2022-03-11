@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
+import org.springframework.stereotype.Component;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -15,21 +17,21 @@ import com.virnect.smic.daemon.service.tasklet.ReadTasklet;
 
 @Slf4j
 @RequiredArgsConstructor
+@Component
 @Getter @Setter
-public class ReadServiceCallable implements Callable {
+public class ReadServiceCallable {//implements Callable {
 
 	private final ReadTasklet tasklet;
-	private final List<Tag> tags;
-	private final OpcUaClient client;
+	private  List<Tag> tags;
+	private  OpcUaClient client;
 
-	@Override
+	//@Override
 	public Object call() throws Exception {
 		String result = "";
 		for(Tag tag : tags)
 		{
 			tasklet.setTag(tag);
 			tasklet.initiate(tag.getNodeId(), client);
-			//tasklet.setClient(client);
 			result =  tasklet.readAndPublish();
 		}
 		return result;

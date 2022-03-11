@@ -1,25 +1,19 @@
 package com.virnect.smic.common.util;
 
+import lombok.Getter;
+
+@Getter
 public class TraceStatus {
     private TraceId traceId;
     private Long startTimeMs;
-    private String message;
+    private String className;
+    private String methodName;
     
-    public TraceStatus(TraceId traceId, Long startTimeMs, String message) {
+    public TraceStatus(TraceId traceId, Long startTimeMs, String className, String methodName) {
         this.traceId = traceId;
         this.startTimeMs = startTimeMs;
-        this.message = message;
+        this.className = className;
+        this.methodName = methodName;
     }
 
-    public TraceId getTraceId() {
-        return traceId;
-    }
-
-    public Long getStartTimeMs() {
-        return startTimeMs;
-    }
-
-    public String getMessage() {
-        return message;
-    }
 }

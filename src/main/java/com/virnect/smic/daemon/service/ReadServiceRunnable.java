@@ -28,20 +28,23 @@ public class ReadServiceRunnable implements Runnable {
 	@Override
 	public void run() {
 
-		log.info("******************** batch run starts");
-		tasks.parallelStream().forEach(task -> {
+		runReadService();
+	}
 
+	private void runReadService(){
+		log.info("******************** batch run starts");
+		//tasks.parallelStream().forEach(task -> {
+		tasks.stream().forEach(task -> {
 			List<Tag> targetTagas = tags.stream().filter(tag -> tag.getTask().getId().equals(task.getId())).collect(Collectors.toList());
 			
 			log.info("task starts : "  + targetTagas.get(0).getTask().getName() );
 			StopWatch watcher = new StopWatch();
 			watcher.start();
 
-			targetTagas.forEach(tag->{
+			targetTagas.parallelStream().forEach(tag->{
 			
 					tasklet.setTag(tag);
 					tasklet.initiate(tag.getNodeId(), client);
-					//tasklet.setClient(client);
 					tasklet.readAndPublish();
 				});
 

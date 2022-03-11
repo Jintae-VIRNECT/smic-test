@@ -1,56 +1,73 @@
 package com.virnect.smic.daemon.config;
 
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Sort;
 
-import java.util.ArrayList;
+
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.virnect.smic.common.data.dao.TagRepository;
+import com.virnect.smic.common.data.dao.TaskRepository;
 import com.virnect.smic.common.data.domain.JobExecution;
+import com.virnect.smic.common.data.domain.Tag;
+import com.virnect.smic.common.data.domain.Task;
+import com.virnect.smic.common.util.LogTrace;
+import com.virnect.smic.common.util.TimeLogTraceUtil;
 import com.virnect.smic.daemon.config.support.SimpleJobLauncher;
 import com.virnect.smic.daemon.config.support.SimpleTaskLauncher;
 import com.virnect.smic.daemon.launch.JobLauncher;
 import com.virnect.smic.daemon.mq.TopicManager;
-import com.virnect.smic.daemon.mq.kafka.KafkaTopicManager;
 import com.virnect.smic.daemon.mq.rabbitmq.RabbitMqQueueManager;
 
 @Slf4j
 @Configuration
-@RequiredArgsConstructor
 public class DefaultConfiguration {
 	private final SimpleJobLauncher jobLauncher;
 	private final SimpleTaskLauncher simpleTaskLauncher;
+	private final TaskRepository taskRepository;
 	private final TagRepository tagRepository;
-	private final Environment env;
-	
-	private TopicManager topicManager;
-	
-	private JobExecution jobExecution;
-	private OpcUaClient client;
-	
-	//temp
-    @Bean (name="tagFiles")
-	@ConfigurationProperties(prefix = "resource.tag.file")
-	public List<String> getTagFiles(){
-		return new ArrayList<String>();
+
+	//private final Environment env;
+
+	public DefaultConfiguration(SimpleJobLauncher jobLauncher, @Lazy SimpleTaskLauncher simpleTaskLauncher,
+	TaskRepository taskRepository, TagRepository tagRepository) {
+		this.jobLauncher = jobLauncher;
+		this.simpleTaskLauncher = simpleTaskLauncher;
+		this.taskRepository = taskRepository;
+		this.tagRepository = tagRepository;
 	}
 
-	//temp
-    @Bean (name="avgConv011NodeIds")
-	@ConfigurationProperties(prefix = "my.node-id-sim")
-	public List<String> getNodeIds(){
-		return new ArrayList<String>();
+	private TopicManager topicManager;
+
+	private JobExecution jobExecution;
+	private OpcUaClient client;
+
+	@Bean
+    public LogTrace logTrace(){
+        return new TimeLogTraceUtil();
+    }
+
+	@Bean (name="taskList")
+	public List<Task> taskList(){
+		return taskRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+	}
+
+	@Bean (name="tagList")
+	public List<Tag> tagList(){
+		return tagRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
+			.stream()
+            .filter(tag -> tag.getTask().getId() ==2 )
+			.collect(Collectors.toList());
+
 	}
 
 	@EventListener(ApplicationReadyEvent.class)
@@ -70,7 +87,7 @@ public class DefaultConfiguration {
 	public void launchTaskExecutor(JobExecution jobExecution) {
 		
 		try {
-			topicManager  = new RabbitMqQueueManager(tagRepository);
+			topicManager  = new RabbitMqQueueManager(tagList());
 			//topicManager = new KafkaTopicManager(env, tagRepository);
 			topicManager.create();
 			simpleTaskLauncher.run(client, jobExecution);

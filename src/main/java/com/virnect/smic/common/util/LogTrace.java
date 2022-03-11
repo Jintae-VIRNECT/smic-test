@@ -1,7 +1,7 @@
 package com.virnect.smic.common.util;
 
 public interface LogTrace {
-    TraceStatus begin(String message);
+    TraceStatus begin(String className, String methodName);
 
     void end(TraceStatus status);
 
