@@ -11,9 +11,12 @@ import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import com.virnect.smic.common.data.domain.JobExecution;
@@ -28,7 +31,7 @@ import com.virnect.smic.daemon.service.tasklet.ReadTasklet;
 import com.virnect.smic.daemon.thread.NamedExceptionHandlingThreadFactory;
 
 @Slf4j
-//@RequiredArgsConstructor
+@Getter @Setter
 @Component
 public class SimpleTaskLauncher implements DisposableBean {
 
@@ -42,6 +45,8 @@ public class SimpleTaskLauncher implements DisposableBean {
 	@Qualifier("tagList")
     private List<Tag> tags;
 
+	private OpcUaClient client;
+
 	public SimpleTaskLauncher( ReadTasklet tasklet) {//@Lazy ReadTasklet tasklet) {
 		this.tasklet = tasklet;
 	}
@@ -54,14 +59,10 @@ public class SimpleTaskLauncher implements DisposableBean {
 
 		int numOfCores = Runtime.getRuntime().availableProcessors();
 		log.debug("************** number of cors: "+ numOfCores);
-		 tasks = tasks.stream()
-		 	.filter(task -> task.getId() ==2 )//< numOfCores+1)
-		 	.collect(Collectors.toList());
-
 		log.info("parallelism: "+ ForkJoinPool.getCommonPoolParallelism());
-		//System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "100");
-
-		runScheduledFixedDelay(tasks, client);
+		System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "100");
+		setClient(client);
+		// runScheduledFixedDelay(tasks, client);
 	    //runOneTimeWithTaskExec(tasks, client);
 		
 		return null;
@@ -95,18 +96,19 @@ public class SimpleTaskLauncher implements DisposableBean {
 		
 	}
 
-	private void runScheduledFixedDelay(List<Task> tasks, OpcUaClient client){
+	@Async
+	@Scheduled(fixedDelay = 1000, initialDelay = 5000)
+	void runScheduledFixedDelay(){
+		tasks.stream().forEach(task -> {
+			List<Tag> targetTagas = tags.stream().filter(tag -> tag.getTask().getId().equals(task.getId())).collect(Collectors.toList());
 		
-		ScheduledExecutorService execService
-			= Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors()
-						,new NamedExceptionHandlingThreadFactory("read-task1"));
-
-		ReadServiceRunnable t = new ReadServiceRunnable(tasklet, tags, tasks, client);
-		execService.scheduleWithFixedDelay(
-			t
-			, 0
-			, 1
-			, TimeUnit.SECONDS);
+			targetTagas.parallelStream().forEach(tag->{
+			
+					tasklet.setTag(tag);
+					tasklet.initiate(tag.getNodeId(), getClient());
+					tasklet.readAndPublish();
+				});
+			});
 	}
 
 	@Override

@@ -34,15 +34,15 @@ public class ProxyConfiguration {
     //     return proxy;
     // }
 
-    private Advisor getAdvisor(LogTrace logTrace){
+    // private Advisor getAdvisor(LogTrace logTrace){
 
-        //pointcut
-        NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
-        pointcut.setMappedNames("runReadService");
+    //     //pointcut
+    //     NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+    //     pointcut.setMappedNames("runReadService");
 
-        LogTraceAdvice advice = new LogTraceAdvice(logTrace);
-        return new DefaultPointcutAdvisor(pointcut, advice);
+    //     LogTraceAdvice advice = new LogTraceAdvice(logTrace);
+    //     return new DefaultPointcutAdvisor(pointcut, advice);
 
-    }
+    // }
     
 }
