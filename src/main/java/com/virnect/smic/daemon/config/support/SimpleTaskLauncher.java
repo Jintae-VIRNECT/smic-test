@@ -26,9 +26,7 @@ import com.virnect.smic.common.data.domain.TaskExecution;
 import com.virnect.smic.daemon.config.annotation.OpcUaConnection;
 import com.virnect.smic.daemon.config.connection.ConnectionPoolImpl;
 import com.virnect.smic.daemon.service.ReadServiceCallable;
-import com.virnect.smic.daemon.service.ReadServiceRunnable;
 import com.virnect.smic.daemon.service.tasklet.ReadTasklet;
-import com.virnect.smic.daemon.thread.NamedExceptionHandlingThreadFactory;
 
 @Slf4j
 @Getter @Setter
@@ -63,35 +61,26 @@ public class SimpleTaskLauncher implements DisposableBean {
 		System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "100");
 		setClient(client);
 		// runScheduledFixedDelay(tasks, client);
-	    //runOneTimeWithTaskExec(tasks, client);
+	    // runOneTimeWithTaskExec(tasks, client);
 		
 		return null;
 	}
 
 	private void runOneTimeWithTaskExec(List<Task> tasks, OpcUaClient client){
 		
-		//ExecutorService execService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-		//List<Tag> tags = tagRepository.findAll();
-
 		tasks.parallelStream().forEach(task -> { 
 
 			List<Tag> targetTags = tags.stream().filter(tag -> tag.getTask().getId().equals(task.getId())).collect(Collectors.toList());
 			ReadServiceCallable t = new ReadServiceCallable(tasklet);//, targetTags, client);
 			t.setTags(targetTags);
 			t.setClient(client);
-			//log.info("task start: "+ task.getName());
-			//StopWatch watcher = new StopWatch();
-			//watcher.start();
-			//Future<String> future = execService.submit(t);
+			
 			try {
-				//future.get();
 				t.call();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			//log.info("task ends: "+ task.getName());
-			//watcher.stop();
-			//log.info("time taken: "+ watcher.getTime());
+			
 		});	
 		
 	}
