@@ -8,11 +8,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Sort;
 
-
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.virnect.smic.common.data.dao.TagRepository;
@@ -58,16 +57,17 @@ public class DefaultConfiguration {
 
 	@Bean (name="taskList")
 	public List<Task> taskList(){
-		return taskRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+		List<Task> tasks =  taskRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+		return Collections.synchronizedList(tasks);
 	}
 
 	@Bean (name="tagList")
 	public List<Tag> tagList(){
-		return tagRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
+		List<Tag> tags =  tagRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
 			.stream()
-            .filter(tag -> tag.getTask().getId() ==2 )
+            .filter(tag -> tag.getTask().getId() < 99 )
 			.collect(Collectors.toList());
-
+		return Collections.synchronizedList(tags);
 	}
 
 	@EventListener(ApplicationReadyEvent.class)

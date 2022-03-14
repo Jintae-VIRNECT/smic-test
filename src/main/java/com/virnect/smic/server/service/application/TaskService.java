@@ -13,7 +13,6 @@ import com.virnect.smic.daemon.service.tasklet.ReadTasklet;
 import com.virnect.smic.server.data.dto.response.PageMetadataResponse;
 import com.virnect.smic.server.data.dto.response.TagValueListResponse;
 
-import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.springframework.stereotype.Service;
 
@@ -35,16 +34,11 @@ public class TaskService {
     public TagValueListResponse getTagValues(OpcUaClient client, Long taskId) {
 
 		List<Tag> tags = tagRepository.findByTaskId(taskId);
-        ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
-       
-       tags.parallelStream().forEach(tag->{
-           readTasklet.initiate(tag.getNodeId(), client);
-           String result = readTasklet.readOnly();
-           map.put(tag.getNodeId(), result);
-        });
+        ConcurrentHashMap<String, String> result = readTasklet.readAndPublishAsync(tags, client, false);
 
-		PageMetadataResponse pageMeta = PagingUtils.pagingBuilder(false, null, map.size(), 1, map.size(), true);
+		PageMetadataResponse pageMeta = PagingUtils.pagingBuilder(
+                                                        false, null, result.size(), 1, result.size(), true);
         
-        return new TagValueListResponse(map, pageMeta);
+        return new TagValueListResponse(result, pageMeta);
     }
 }

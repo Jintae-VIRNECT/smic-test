@@ -1,11 +1,7 @@
 package com.virnect.smic.daemon.config.support;
 
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.springframework.beans.factory.DisposableBean;
@@ -25,7 +21,6 @@ import com.virnect.smic.common.data.domain.Task;
 import com.virnect.smic.common.data.domain.TaskExecution;
 import com.virnect.smic.daemon.config.annotation.OpcUaConnection;
 import com.virnect.smic.daemon.config.connection.ConnectionPoolImpl;
-import com.virnect.smic.daemon.service.ReadServiceCallable;
 import com.virnect.smic.daemon.service.tasklet.ReadTasklet;
 
 @Slf4j
@@ -45,7 +40,7 @@ public class SimpleTaskLauncher implements DisposableBean {
 
 	private OpcUaClient client;
 
-	public SimpleTaskLauncher( ReadTasklet tasklet) {//@Lazy ReadTasklet tasklet) {
+	public SimpleTaskLauncher( ReadTasklet tasklet){
 		this.tasklet = tasklet;
 	}
 	
@@ -58,46 +53,21 @@ public class SimpleTaskLauncher implements DisposableBean {
 		int numOfCores = Runtime.getRuntime().availableProcessors();
 		log.debug("************** number of cors: "+ numOfCores);
 		log.info("parallelism: "+ ForkJoinPool.getCommonPoolParallelism());
-		System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "100");
+		// System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "100");
 		setClient(client);
-		// runScheduledFixedDelay(tasks, client);
-	    // runOneTimeWithTaskExec(tasks, client);
+	    //runOneTimeWithTaskExec(tasks, client);
 		
 		return null;
 	}
 
 	private void runOneTimeWithTaskExec(List<Task> tasks, OpcUaClient client){
-		
-		tasks.parallelStream().forEach(task -> { 
-
-			List<Tag> targetTags = tags.stream().filter(tag -> tag.getTask().getId().equals(task.getId())).collect(Collectors.toList());
-			ReadServiceCallable t = new ReadServiceCallable(tasklet);//, targetTags, client);
-			t.setTags(targetTags);
-			t.setClient(client);
-			
-			try {
-				t.call();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-		});	
-		
+		tasklet.readAndPublishAsync(tags, getClient(), true);
 	}
 
 	@Async
-	@Scheduled(fixedDelay = 1000, initialDelay = 5000)
+	@Scheduled(fixedDelay = 1000, initialDelay = 15000)
 	void runScheduledFixedDelay(){
-		tasks.stream().forEach(task -> {
-			List<Tag> targetTagas = tags.stream().filter(tag -> tag.getTask().getId().equals(task.getId())).collect(Collectors.toList());
-		
-			targetTagas.parallelStream().forEach(tag->{
-			
-					tasklet.setTag(tag);
-					tasklet.initiate(tag.getNodeId(), getClient());
-					tasklet.readAndPublish();
-				});
-			});
+		tasklet.readAndPublishAsync(tags, getClient(), true);
 	}
 
 	@Override

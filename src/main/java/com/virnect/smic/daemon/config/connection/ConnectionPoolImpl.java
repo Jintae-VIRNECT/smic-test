@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ConnectionPoolImpl implements ConnectionPool {
 
-    private static int INITIAL_POOL_SIZE = 2;
+    private static int INITIAL_POOL_SIZE = 1;
     private static Environment env;
     private static BlockingQueue<Optional<OpcUaClient>> connectionPool = new LinkedBlockingDeque<>(INITIAL_POOL_SIZE);
     private static BlockingQueue<OpcUaClient> usedConnection = new LinkedBlockingDeque<>(INITIAL_POOL_SIZE);

@@ -4,6 +4,7 @@ package com.virnect.smic.daemon.mq.kafka;
 import java.io.IOException;
 import java.util.Properties;
 
+import com.virnect.smic.common.data.domain.ExecutionStatus;
 import com.virnect.smic.daemon.mq.ProducerManager;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -46,7 +47,7 @@ public class KafkaProducerManager implements ProducerManager {
 		return new KafkaProducer<>(props);
 	}
 
-	public void runProducer(final int sendMessageCount, String topic, String value) throws IOException {
+	public ExecutionStatus runProducer(final int sendMessageCount, String topic, String value) throws IOException {
 		
 		long time = System.currentTimeMillis();
 
@@ -58,15 +59,19 @@ public class KafkaProducerManager implements ProducerManager {
 
 				RecordMetadata metadata = producer.send(record).get();
 
-				long elapsedTime = System.currentTimeMillis() - time;
-				log.debug("sent record(key=%s value=%s) " +
-						"meta(partition=%d, offset=%d) time=%d\n",
-					record.key(), record.value(), metadata.partition(),
-					metadata.offset(), elapsedTime);
+				// long elapsedTime = System.currentTimeMillis() - time;
+				// log.debug("sent record(key=%s value=%s) " +
+				// 		"meta(partition=%d, offset=%d) time=%d\n",
+				// 	record.key(), record.value(), metadata.partition(),
+				// 	metadata.offset(), elapsedTime);
+
+				
 
 			}
+			return ExecutionStatus.COMPLETED;
 		}catch (Exception e){
 			e.printStackTrace();
+			return ExecutionStatus.FAILED;
 		}
 		// finally {
 		// 	producer.flush();

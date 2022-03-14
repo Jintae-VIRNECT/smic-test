@@ -2,6 +2,8 @@ package com.virnect.smic.daemon.mq;
 
 import java.io.IOException;
 
+import com.virnect.smic.common.data.domain.ExecutionStatus;
+
 public interface ProducerManager {
-    void runProducer(final int sendMessageCount, String topic, String value) throws IOException ;
+    ExecutionStatus runProducer(final int sendMessageCount, String topic, String value) throws IOException ;
 }

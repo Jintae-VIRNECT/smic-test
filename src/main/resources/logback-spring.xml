@@ -33,7 +33,27 @@
 
     </appender>
 
+    <appender name="ReadTasklet"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--<file>${LOGS}/application-external-${byMinute}.log</file>-->
+        <file>${LOGS}/application-readTasklet-${bySecond}.log</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+        </encoder>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily and when the file reaches 30 MegaBytes -->
+            <fileNamePattern>${LOGS}/archived/application-readTasklet-%d{yyyy-MM-dd}%d{HH-mm-ss}.%i.log
+            </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>30MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
 
+    </appender>
 
     <!-- LOG everything at INFO level -->
     <root level="info">
@@ -41,5 +61,9 @@
         <appender-ref ref="Console" />
     </root>
 
+    <logger name="com.virnect.smic.daemon.service.tasklet.ReadTasklet"
+            level="info" additivity="false">
+        <appender-ref ref="ReadTasklet"/>
+    </logger>
 
 </configuration>
