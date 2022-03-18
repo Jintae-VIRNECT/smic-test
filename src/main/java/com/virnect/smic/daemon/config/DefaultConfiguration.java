@@ -1,6 +1,7 @@
 package com.virnect.smic.daemon.config;
 
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ import com.virnect.smic.common.data.domain.Tag;
 import com.virnect.smic.common.data.domain.Task;
 import com.virnect.smic.common.util.LogTrace;
 import com.virnect.smic.common.util.TimeLogTraceUtil;
+import com.virnect.smic.daemon.config.support.SchedulingTaskLauncher;
 import com.virnect.smic.daemon.config.support.SimpleJobLauncher;
 import com.virnect.smic.daemon.config.support.SimpleTaskLauncher;
 import com.virnect.smic.daemon.launch.JobLauncher;
@@ -36,10 +38,12 @@ public class DefaultConfiguration {
 	private final SimpleTaskLauncher simpleTaskLauncher;
 	private final TaskRepository taskRepository;
 	private final TagRepository tagRepository;
+	private final Environment env;
 
 	private TopicManager topicManager;
 
-	private final Environment env;
+	@Autowired(required = false)
+	private SchedulingTaskLauncher schedulingTaskLauncher;
 
 	public DefaultConfiguration(SimpleJobLauncher jobLauncher, @Lazy SimpleTaskLauncher simpleTaskLauncher,
 	TaskRepository taskRepository, TagRepository tagRepository, Environment env) {
@@ -99,6 +103,10 @@ public class DefaultConfiguration {
 
 			topicManager.create();
 			simpleTaskLauncher.run(client, jobExecution);
+			if(schedulingTaskLauncher != null){
+				schedulingTaskLauncher.run(client);
+				log.info("********************** run scheduling task");
+			}
 		} catch (Exception e) {
 			throw new ConfigurationException(e);
 		}

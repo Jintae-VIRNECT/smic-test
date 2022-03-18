@@ -17,7 +17,7 @@ public class TimeLogTraceAspect {
     
     private final LogTrace trace;
 
-    @Around("execution(* *..*.service..*Service*.*(..)) || execution(* com.virnect.smic.daemon.config.support.SimpleTaskLauncher.*(..))")
+    @Around("execution(* *..*.service..*Service*.*(..)) || execution(* com.virnect.smic.daemon.config.support.*TaskLauncher.*(..))")
     public Object traceLogAround(ProceedingJoinPoint joinPoint) {
         TraceStatus status = null;
         Object result = null;

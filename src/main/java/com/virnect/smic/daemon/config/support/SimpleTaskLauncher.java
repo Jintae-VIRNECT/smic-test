@@ -8,6 +8,8 @@ import org.eclipse.milo.opcua.stack.core.UaException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -42,6 +44,9 @@ public class SimpleTaskLauncher implements DisposableBean {
 
 	private OpcUaClient client;
 
+	@Value(value="${server.daemon:true}")
+	private boolean isDaemon;
+
 	public SimpleTaskLauncher( ReadTasklet tasklet){
 		this.tasklet = tasklet;
 	}
@@ -62,7 +67,7 @@ public class SimpleTaskLauncher implements DisposableBean {
 		} catch (UaException e) {
 			e.printStackTrace();
 		}
-	    runOneTimeWithTaskExec(tasks, client);
+	    // runOneTimeWithTaskExec(tasks, client);
 		
 		return null;
 	}
@@ -71,11 +76,13 @@ public class SimpleTaskLauncher implements DisposableBean {
 		tasklet.readAndPublishAsync(tags, getClient(), true);
 	}
 
-	//@Async
-	//@Scheduled(fixedDelay = 1000, initialDelay = 15000)
-	void runScheduledFixedDelay(){
-		tasklet.readAndPublishAsync(tags, getClient(), true);
-	}
+	// @Async
+	// @Scheduled(fixedDelay = 1000, initialDelay = 10000)
+	// @ConditionalOnProperty(value="${server.daemon}", havingValue= "true")
+	// void runScheduledFixedDelay(){
+	// 	if(getClient()!= null)
+	// 		tasklet.readAndPublishAsync(tags, getClient(), true);
+	// }
 
 	@Override
 	public void destroy() throws Exception {

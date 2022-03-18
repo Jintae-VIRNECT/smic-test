@@ -25,7 +25,7 @@ public class OpcUaConnectionAspect {
 	public Object doConnection(ProceedingJoinPoint joinPoint) throws Throwable {
 
 		Object[] args = joinPoint.getArgs();
-		log.debug("********************[connection] {} args={}", joinPoint.getSignature(), args );
+		log.info("********************[connection] {} args={}", joinPoint.getSignature(), args );
 
 		ConnectionPoolImpl pool = ConnectionPoolImpl.getInstance();
 

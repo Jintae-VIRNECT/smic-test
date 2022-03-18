@@ -1,6 +1,7 @@
 server:
   port: 8090
-  
+  daemon: false
+    
 spring:
   application:
     name: remote-service-server-local

@@ -108,7 +108,7 @@ public class ReadTasklet {
 
 	private ConcurrentHashMap<String, String> getResultMap(Queue<NodeId> nodes, List<DataValue> dataValues){
 		ConcurrentHashMap<String, String> result = new ConcurrentHashMap<>();
-		dataValues.parallelStream().forEach(
+		dataValues.forEach(
 			value-> {
 				String nodeId = nodes.poll().getIdentifier().toString();
 				String dataValue = "";
