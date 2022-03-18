@@ -8,6 +8,8 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.virnect.smic.common.data.domain.ExecutionStatus;
 import com.virnect.smic.daemon.mq.ProducerManager;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -20,8 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 public class RabbitMqProducerManager implements ProducerManager {
 
     private static Channel producer;
-
-    public RabbitMqProducerManager(){
+    private static Environment env;
+    
+    @Autowired
+    public RabbitMqProducerManager(Environment env){
+        this.env = env;
         try {
             producer = createRabbitMqChannel();
         } catch (IOException | TimeoutException e) {
@@ -29,10 +34,10 @@ public class RabbitMqProducerManager implements ProducerManager {
         }
     }
 
-    private  Channel createRabbitMqChannel() throws IOException, TimeoutException {
+    private static Channel createRabbitMqChannel() throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        factory.setPort(5672);
+        factory.setHost(env.getProperty("mq.rabbitmq.host"));
+        factory.setPort(Integer.parseInt(env.getProperty("mq.rabbitmq.port")));
         Channel channel = factory.newConnection().createChannel();
         // List<String> tags = getTagList();
         // tags.forEach(tag-> {

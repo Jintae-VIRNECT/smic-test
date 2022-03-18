@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
+import org.eclipse.milo.opcua.stack.core.UaException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,6 +20,7 @@ import com.virnect.smic.common.data.domain.JobExecution;
 import com.virnect.smic.common.data.domain.Tag;
 import com.virnect.smic.common.data.domain.Task;
 import com.virnect.smic.common.data.domain.TaskExecution;
+import com.virnect.smic.common.util.OpcUaServerConfigUtil;
 import com.virnect.smic.daemon.config.annotation.OpcUaConnection;
 import com.virnect.smic.daemon.config.connection.ConnectionPoolImpl;
 import com.virnect.smic.daemon.service.tasklet.ReadTasklet;
@@ -51,11 +53,16 @@ public class SimpleTaskLauncher implements DisposableBean {
 	public TaskExecution run(OpcUaClient client, JobExecution jobExecution) {
 
 		int numOfCores = Runtime.getRuntime().availableProcessors();
-		log.debug("************** number of cors: "+ numOfCores);
+		log.debug("************** number of cores: "+ numOfCores);
 		log.info("parallelism: "+ ForkJoinPool.getCommonPoolParallelism());
 		// System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "100");
 		setClient(client);
-	    //runOneTimeWithTaskExec(tasks, client);
+		try {
+			OpcUaServerConfigUtil.getServerConfigInfo(client);
+		} catch (UaException e) {
+			e.printStackTrace();
+		}
+	    runOneTimeWithTaskExec(tasks, client);
 		
 		return null;
 	}
@@ -64,8 +71,8 @@ public class SimpleTaskLauncher implements DisposableBean {
 		tasklet.readAndPublishAsync(tags, getClient(), true);
 	}
 
-	@Async
-	@Scheduled(fixedDelay = 1000, initialDelay = 15000)
+	//@Async
+	//@Scheduled(fixedDelay = 1000, initialDelay = 15000)
 	void runScheduledFixedDelay(){
 		tasklet.readAndPublishAsync(tags, getClient(), true);
 	}
@@ -74,7 +81,7 @@ public class SimpleTaskLauncher implements DisposableBean {
 	public void destroy() throws Exception {
 		System.out.println(
 			"Callback triggered at SimpleTaskLauncher - bean destroy method called.");
-		pool.shutdown();
+	    // something
 		System.out.println(
 			"Callback triggered at SimpleTaskLauncher - bean destroy method ends");
 	}

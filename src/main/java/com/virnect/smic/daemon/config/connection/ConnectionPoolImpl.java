@@ -5,12 +5,15 @@ import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import javax.annotation.PreDestroy;
+
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.UaClient;
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfigBuilder;
 import org.eclipse.milo.opcua.stack.client.DiscoveryClient;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
 import org.eclipse.milo.opcua.stack.core.util.EndpointUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -22,10 +25,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ConnectionPoolImpl implements ConnectionPool {
 
-    private static int INITIAL_POOL_SIZE = 1;
     private static Environment env;
-    private static BlockingQueue<Optional<OpcUaClient>> connectionPool = new LinkedBlockingDeque<>(INITIAL_POOL_SIZE);
-    private static BlockingQueue<OpcUaClient> usedConnection = new LinkedBlockingDeque<>(INITIAL_POOL_SIZE);
+    
+    private static BlockingQueue<Optional<OpcUaClient>> connectionPool;
+    private static BlockingQueue<OpcUaClient> usedConnection;
 
     private static class ConnectionPoolHolder {
 
@@ -36,16 +39,21 @@ public class ConnectionPoolImpl implements ConnectionPool {
         return ConnectionPoolHolder.INSTANCE;
     }
 
+    @Autowired
     private ConnectionPoolImpl(Environment env){
         this.env = env;
     }
 
     private static ConnectionPoolImpl create() {
-        log.info("************************ static pool created ************************ ");
-
-        for (int i = 0; i < INITIAL_POOL_SIZE; i++) {
+        int initialPoolSize = Integer.parseInt(env.getProperty("opc-server.pool-size"));
+        connectionPool = new LinkedBlockingDeque<>(initialPoolSize);
+        usedConnection = new LinkedBlockingDeque<>(initialPoolSize);
+        
+        for (int i = 0; i < initialPoolSize; i++) {
             connectionPool.add(Optional.ofNullable(createConnection()));
         }
+
+        log.info("************************ static pool created ************************ ");
         return new ConnectionPoolImpl(env);
     }
 
@@ -88,23 +96,20 @@ public class ConnectionPoolImpl implements ConnectionPool {
         for ( Optional<OpcUaClient> client : connectionPool) {
             client.ifPresent(c-> c.disconnect());
         }
+        
         connectionPool.clear();
-        System.out.println("********************** all cleared");
+        System.out.println("**********************connection all cleared");
     }
 
     private static OpcUaClient createConnection() {
-         final String SERVER_HOSTNAME = "222.98.122.50";
-         final int SERVER_PORT = 4840;
+
+         final String SERVER_HOSTNAME = env.getProperty("opc-server.host");
+         final int SERVER_PORT = Integer.parseInt(env.getProperty("opc-server.port"));
 
         try {
             List<EndpointDescription> endpoints
                 = DiscoveryClient.getEndpoints("opc.tcp://"+ SERVER_HOSTNAME + ":" + SERVER_PORT).get();
             EndpointDescription configPoint = EndpointUtil.updateUrl(endpoints.get(0), SERVER_HOSTNAME, SERVER_PORT);
-
-            // List<EndpointDescription> endpoints
-            //     = DiscoveryClient.getEndpoints("opc.tcp://"+ env.getProperty("opc-server.host") + ":" + env.getProperty("opc-server.port")).get();
-            // EndpointDescription configPoint = EndpointUtil.updateUrl(endpoints.get(0),  env.getProperty("opc-server.host")
-            //     , Integer.parseInt(env.getProperty("opc-server.port")));
 
             OpcUaClientConfigBuilder cfg = new OpcUaClientConfigBuilder();
             cfg.setEndpoint(configPoint);
@@ -123,6 +128,11 @@ public class ConnectionPoolImpl implements ConnectionPool {
     private void logConnectionStatus(String methodName){
         log.debug(methodName + "called ******************** connectionPool capacity : " + connectionPool.remainingCapacity());
         log.debug(methodName + "called ******************** usedPool capacity : " + usedConnection.remainingCapacity());
+    }
+
+    @PreDestroy
+    public void destroy() throws Exception {
+        shutdown();
     }
 
 }

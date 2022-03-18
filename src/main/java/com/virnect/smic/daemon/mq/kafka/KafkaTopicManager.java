@@ -44,7 +44,7 @@ public class KafkaTopicManager implements TopicManager {
 	public void create() throws ExecutionException, InterruptedException {
 		Properties config = new Properties();
 		config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
-			env.getProperty("kafka.host")+ ":"+ env.getProperty("kafka.port"));
+			env.getProperty("mq.kafka.host")+ ":"+ env.getProperty("mq.kafka.port"));
 		config.put(TopicConfig.CLEANUP_POLICY_CONFIG, TopicConfig.CLEANUP_POLICY_COMPACT);
 		config.put(TopicConfig.COMPRESSION_TYPE_CONFIG, "gzip");
 

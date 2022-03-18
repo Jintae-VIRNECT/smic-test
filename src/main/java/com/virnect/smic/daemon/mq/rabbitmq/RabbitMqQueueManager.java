@@ -15,6 +15,7 @@ import com.virnect.smic.daemon.mq.TopicManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.env.Environment;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -30,13 +31,15 @@ public class RabbitMqQueueManager implements TopicManager{
 	@Qualifier("tagList")
     private final List<Tag> tagList;
 
+    private final Environment env;
+
     public void create() throws IOException, TimeoutException {
 
         List<String> tags = tagList.stream().map(o-> o.getNodeId()).collect(Collectors.toList());
 
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        factory.setPort(5672);
+        factory.setHost(env.getProperty("mq.rabbitmq.host"));
+        factory.setPort(Integer.parseInt(env.getProperty("mq.rabbitmq.port")));
         try (Connection connection = factory.newConnection();
             Channel channel = connection.createChannel()) {
                 

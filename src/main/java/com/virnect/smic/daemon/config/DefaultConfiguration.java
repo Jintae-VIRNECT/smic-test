@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort;
 
 import java.util.Collections;
@@ -25,6 +26,7 @@ import com.virnect.smic.daemon.config.support.SimpleJobLauncher;
 import com.virnect.smic.daemon.config.support.SimpleTaskLauncher;
 import com.virnect.smic.daemon.launch.JobLauncher;
 import com.virnect.smic.daemon.mq.TopicManager;
+import com.virnect.smic.daemon.mq.kafka.KafkaTopicManager;
 import com.virnect.smic.daemon.mq.rabbitmq.RabbitMqQueueManager;
 
 @Slf4j
@@ -35,17 +37,19 @@ public class DefaultConfiguration {
 	private final TaskRepository taskRepository;
 	private final TagRepository tagRepository;
 
-	//private final Environment env;
+	private TopicManager topicManager;
+
+	private final Environment env;
 
 	public DefaultConfiguration(SimpleJobLauncher jobLauncher, @Lazy SimpleTaskLauncher simpleTaskLauncher,
-	TaskRepository taskRepository, TagRepository tagRepository) {
+	TaskRepository taskRepository, TagRepository tagRepository, Environment env) {
 		this.jobLauncher = jobLauncher;
 		this.simpleTaskLauncher = simpleTaskLauncher;
 		this.taskRepository = taskRepository;
 		this.tagRepository = tagRepository;
+		this.env = env;
+		
 	}
-
-	private TopicManager topicManager;
 
 	private JobExecution jobExecution;
 	private OpcUaClient client;
@@ -87,8 +91,12 @@ public class DefaultConfiguration {
 	public void launchTaskExecutor(JobExecution jobExecution) {
 		
 		try {
-			topicManager  = new RabbitMqQueueManager(tagList());
-			//topicManager = new KafkaTopicManager(env, tagRepository);
+			if(env.getProperty("mq.queue-manager").equalsIgnoreCase("rabbitmq")){
+				topicManager = new RabbitMqQueueManager(tagList(), env);
+			}else{
+				topicManager = new KafkaTopicManager(env, tagRepository);
+			}
+
 			topicManager.create();
 			simpleTaskLauncher.run(client, jobExecution);
 		} catch (Exception e) {

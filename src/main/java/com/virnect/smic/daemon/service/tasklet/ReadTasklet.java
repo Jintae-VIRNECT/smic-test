@@ -7,6 +7,7 @@ import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +30,7 @@ import com.virnect.smic.daemon.mq.rabbitmq.RabbitMqProducerManager;
 @Slf4j
 @Component
 @Getter @Setter
+@RequiredArgsConstructor
 public class ReadTasklet {
 	private OpcUaClient client;
 	private ThreadLocal<String> nodeIdHolder = new ThreadLocal<>();
@@ -36,8 +38,7 @@ public class ReadTasklet {
 	private Tag tag;
 	
 	private final AtomicInteger counter = new AtomicInteger(0);
-
-	private final ProducerManager producerManager = new RabbitMqProducerManager(); //new KafkaProducerManager();
+	private final ProducerManager producerManager;// = new RabbitMqProducerManager(); //new KafkaProducerManager();
 	
 	public void initiate(String nodeId, OpcUaClient client){
 		nodeIdHolder.set(nodeId);
@@ -107,16 +108,14 @@ public class ReadTasklet {
 
 	private ConcurrentHashMap<String, String> getResultMap(Queue<NodeId> nodes, List<DataValue> dataValues){
 		ConcurrentHashMap<String, String> result = new ConcurrentHashMap<>();
-		dataValues.forEach(
+		dataValues.parallelStream().forEach(
 			value-> {
 				String nodeId = nodes.poll().getIdentifier().toString();
 				String dataValue = "";
 				if(value.getValue().getValue()!= null){
 					dataValue =  value.getValue().getValue().toString();
 				}
-				
-				result.put(nodeId, dataValue);
-				
+				result.put(nodeId, dataValue);	
 			}
 		);
 

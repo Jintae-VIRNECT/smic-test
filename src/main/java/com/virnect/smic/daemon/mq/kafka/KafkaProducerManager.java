@@ -14,6 +14,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
 import lombok.Getter;
@@ -24,11 +25,12 @@ import lombok.extern.slf4j.Slf4j;
 @Getter @Setter
 public class KafkaProducerManager implements ProducerManager {
 
-	//private static Environment env;
+	private static Environment env;
 	private static Producer<Long, String> producer;
 
-	public KafkaProducerManager() {
-		//this.env = env;
+	@Autowired
+	public KafkaProducerManager(Environment env) {
+		this.env = env;
 		producer = createKafkaProducer();
 		
 	}
@@ -37,8 +39,8 @@ public class KafkaProducerManager implements ProducerManager {
 		Properties props = new Properties();
 		props.put(
 			ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-			//env.getProperty("kafka.host")+ ":"+ env.getProperty("kafka.port"));
-			"localhost:9092");
+			env.getProperty("mq.kafka.host")+ ":"+ env.getProperty("mq.kafka.port"));
+			//"localhost:9092");
 		props.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaProducerTest1");
 		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
 			LongSerializer.class.getName());

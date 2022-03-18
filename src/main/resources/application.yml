@@ -27,14 +27,23 @@ logging:
     com.virnect.smic.daemon.service.tasklet: debug
     
 opc-server:
-#   host: 35.232.112.205
-#   port: 8932
+  # host: 35.232.112.205
+  # port: 8932
+  pool-size: 3
   host: 222.98.122.50
-  port: 4840
+  port: 4850
 
-kafka:
-  host: 127.0.0.1 #34.123.51.107
-  port: 9092
+mq: 
+  queue-manager: rabbitmq
+  producer-manager: rabbitmq
+  kafka:
+    enabled: false
+    host: 127.0.0.1 #34.123.51.107
+    port: 9092
+  rabbitmq:
+    enabled: true
+    host: 127.0.0.1
+    port: 5672
 
 resource:
   tag:
