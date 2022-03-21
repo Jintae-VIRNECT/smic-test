@@ -27,8 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RabbitMqQueueManager implements TopicManager{
 
-    @Autowired
-	@Qualifier("tagList")
+    // @Autowired
+	// @Qualifier("tagList")
     private final List<Tag> tagList;
 
     private final Environment env;

@@ -5,11 +5,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
+import com.virnect.smic.common.config.annotation.OpcUaConnection;
 import com.virnect.smic.common.data.dao.TagRepository;
 import com.virnect.smic.common.data.domain.Tag;
+import com.virnect.smic.common.service.tasklet.ReadTasklet;
 import com.virnect.smic.common.util.PagingUtils;
-import com.virnect.smic.daemon.config.annotation.OpcUaConnection;
-import com.virnect.smic.daemon.service.tasklet.ReadTasklet;
 import com.virnect.smic.server.data.dto.response.PageMetadataResponse;
 import com.virnect.smic.server.data.dto.response.TagValueListResponse;
 
@@ -33,7 +33,7 @@ public class TaskService {
     @OpcUaConnection
     public TagValueListResponse getTagValues(OpcUaClient client, Long taskId) {
 
-		List<Tag> tags = tagRepository.findByTaskId(taskId);
+		List<Tag> tags = tagRepository.findByModelLineId(taskId);
         ConcurrentHashMap<String, String> result = readTasklet.readAndPublishAsync(tags, client, false);
 
 		PageMetadataResponse pageMeta = PagingUtils.pagingBuilder(

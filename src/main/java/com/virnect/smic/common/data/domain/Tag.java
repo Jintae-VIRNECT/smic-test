@@ -66,8 +66,8 @@ public class Tag {
 	private String dataRange;
 
 	@ManyToOne(fetch = FetchType.EAGER, optional = false)
-	@JoinColumn(name="task_id")
-	private Task task;
+	@JoinColumn(name="model_line_id")
+	private ModelLine modelLine;
 
 	@Override
 	public String toString() {
@@ -88,7 +88,7 @@ public class Tag {
 			", deviceDataType='" + deviceDataType + '\'' +
 			", unit='" + unit + '\'' +
 			", dataRange='" + dataRange + '\'' +
-			", task=" + task +
+			", modelLine=" + modelLine +
 			'}';
 	}
 }

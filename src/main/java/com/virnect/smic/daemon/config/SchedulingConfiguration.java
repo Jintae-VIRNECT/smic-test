@@ -1,7 +1,7 @@
 package com.virnect.smic.daemon.config;
 
-import com.virnect.smic.daemon.config.support.SchedulingTaskLauncher;
-import com.virnect.smic.daemon.service.tasklet.ReadTasklet;
+import com.virnect.smic.common.config.support.SchedulingTaskLauncher;
+import com.virnect.smic.common.service.tasklet.ReadTasklet;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;

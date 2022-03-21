@@ -11,7 +11,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import lombok.Builder;
@@ -37,14 +36,13 @@ public class TaskExecution extends BaseTimeEntity {
 	@JoinColumn(name = "job_execution_id")
 	private JobExecution jobExecution;
 
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name="task_id")
-	private Task task;
+	// @OneToOne(cascade = CascadeType.ALL)
+	// @JoinColumn(name="model_line_id")
+	// private ModelLine modelLine;
 
 	@Builder
-	public TaskExecution (JobExecution jobExecution, Task task) {
+	public TaskExecution (JobExecution jobExecution) {
 		this.jobExecution = jobExecution;
-		this.task = task;
 		this.status = ExecutionStatus.STARTED;
 	}
 
@@ -55,7 +53,6 @@ public class TaskExecution extends BaseTimeEntity {
 			", status='" + status + '\'' +
 			", count=" + count +
 			", jobExecution=" + jobExecution +
-			", task=" + task +
 			'}';
 	}
 }

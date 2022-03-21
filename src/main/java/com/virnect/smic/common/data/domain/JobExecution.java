@@ -27,6 +27,9 @@ public class JobExecution extends BaseTimeEntity {
 	private Long id;
 
 	@Enumerated(EnumType.STRING)
+	private ExecutionMode mode;
+
+	@Enumerated(EnumType.STRING)
 	private ExecutionStatus status;
 
 	@OneToMany(mappedBy = "id")
@@ -34,8 +37,9 @@ public class JobExecution extends BaseTimeEntity {
 
 
 	@Builder
-	public JobExecution(){
+	public JobExecution(ExecutionMode executionMode){
 		this.status = ExecutionStatus.STARTED;
+		this.mode = executionMode;
 	}
 
 	public boolean isRunning() {

@@ -61,7 +61,7 @@
         <appender-ref ref="Console" />
     </root>
 
-    <logger name="com.virnect.smic.daemon.service.tasklet.ReadTasklet"
+    <logger name="com.virnect.smic.common.service.tasklet.ReadTasklet"
             level="info" additivity="false">
         <appender-ref ref="ReadTasklet"/>
     </logger>

@@ -1,6 +1,6 @@
 server:
   port: 8090
-  daemon: false
+  daemon: true
     
 spring:
   application:
