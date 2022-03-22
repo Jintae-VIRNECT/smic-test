@@ -14,6 +14,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -43,7 +45,8 @@ public class Tag {
 	@ColumnDefault("true")
 	private boolean activated;
 
-	private String tagCategory;
+	@Column(name = "sub2_category")
+	private String sub2Category;
 	private String description;
 	private String content;
 
@@ -53,7 +56,7 @@ public class Tag {
 	private String etc;
 
 	@Enumerated(EnumType.STRING)
-	private MainTaskCategory mainTaskCategory;
+	private MainCategory mainCategory;
 
 	private String subCategory;
 
@@ -77,12 +80,12 @@ public class Tag {
 			", namespace=" + namespace +
 			", nodeId='" + nodeId + '\'' +
 			", activated=" + activated +
-			", tagCategory='" + tagCategory + '\'' +
+			", sub2Category='" + sub2Category + '\'' +
 			", description='" + description + '\'' +
 			", content='" + content + '\'' +
 			", scanRateMs=" + scanRateMs +
 			", etc='" + etc + '\'' +
-			", mainTaskCategory=" + mainTaskCategory +
+			", mainCategory=" + mainCategory +
 			", subCategory='" + subCategory + '\'' +
 			", dataType='" + dataType + '\'' +
 			", deviceDataType='" + deviceDataType + '\'' +

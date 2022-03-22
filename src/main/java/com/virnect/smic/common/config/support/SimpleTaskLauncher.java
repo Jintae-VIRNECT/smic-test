@@ -14,12 +14,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import com.virnect.smic.common.config.annotation.OpcUaConnection;
 import com.virnect.smic.common.config.connection.ConnectionPoolImpl;
-import com.virnect.smic.common.data.domain.JobExecution;
-import com.virnect.smic.common.data.domain.ModelLine;
 import com.virnect.smic.common.data.domain.Tag;
-import com.virnect.smic.common.data.domain.TaskExecution;
 import com.virnect.smic.common.service.tasklet.ReadTasklet;
 import com.virnect.smic.common.util.OpcUaServerConfigUtil;
 
@@ -47,7 +43,7 @@ public class SimpleTaskLauncher implements DisposableBean {
 	private  ConnectionPoolImpl pool;
 
 	//@OpcUaConnection
-	public TaskExecution run(OpcUaClient client, JobExecution jobExecution) {
+	public void run(OpcUaClient client) {
 
 		int numOfCores = Runtime.getRuntime().availableProcessors();
 		log.debug("************** number of cores: "+ numOfCores);
@@ -61,11 +57,10 @@ public class SimpleTaskLauncher implements DisposableBean {
 		}
 	    // runOneTimeWithTaskExec(client);
 		
-		return null;
 	}
 
 	private void runOneTimeWithTaskExec(OpcUaClient client){
-		tasklet.readAndPublishAsync(tags, getClient(), true);
+		tasklet.readAndPublishAsync(tags, getClient(), true, null);
 	}
 
 	@Override

@@ -127,9 +127,9 @@ public class ConnectionPoolImpl implements ConnectionPool {
 
     private void logConnectionStatus(String methodName){
         int initialPoolSize = Integer.parseInt(env.getProperty("opc-server.pool-size"));
-        log.info(methodName + "called. connectionPool's available capacity : " 
+        log.debug(methodName + "called. connectionPool's available capacity : " 
             + (initialPoolSize - connectionPool.remainingCapacity()));
-        log.info(methodName + "called. usedPool's current capacity : " 
+        log.debug(methodName + "called. usedPool's current capacity : " 
             + ( initialPoolSize - usedConnection.remainingCapacity()));
     }
 

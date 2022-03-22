@@ -34,7 +34,7 @@ public class TaskService {
     public TagValueListResponse getTagValues(OpcUaClient client, Long taskId) {
 
 		List<Tag> tags = tagRepository.findByModelLineId(taskId);
-        ConcurrentHashMap<String, String> result = readTasklet.readAndPublishAsync(tags, client, false);
+        ConcurrentHashMap<String, String> result = readTasklet.readAndPublishAsync(tags, client, false, null);
 
 		PageMetadataResponse pageMeta = PagingUtils.pagingBuilder(
                                                         false, null, result.size(), 1, result.size(), true);

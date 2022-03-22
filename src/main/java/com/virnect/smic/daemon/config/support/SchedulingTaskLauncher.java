@@ -1,4 +1,4 @@
-package com.virnect.smic.common.config.support;
+package com.virnect.smic.daemon.config.support;
 
 import java.util.List;
 
@@ -43,6 +43,6 @@ public class SchedulingTaskLauncher{
 	@Scheduled(fixedDelay = 1000, initialDelay = 5000)
 	void runScheduledFixedDelay(){
 		if(getClient()!= null )
-			tasklet.readAndPublishAsync(tags, getClient(), true);
+			tasklet.readAndPublishAsync(tags, getClient(), true, null);
 	}
 }

@@ -13,10 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 import com.virnect.smic.common.config.ConfigurationException;
-import com.virnect.smic.common.config.support.SchedulingTaskLauncher;
 import com.virnect.smic.common.data.dao.TagRepository;
-import com.virnect.smic.common.data.domain.JobExecution;
 import com.virnect.smic.common.data.domain.Tag;
+import com.virnect.smic.daemon.config.support.SchedulingTaskLauncher;
 import com.virnect.smic.daemon.mq.TopicManager;
 import com.virnect.smic.daemon.mq.kafka.KafkaTopicManager;
 import com.virnect.smic.daemon.mq.rabbitmq.RabbitMqQueueManager;
@@ -42,20 +41,20 @@ public class DaemonConfiguration {
 		
 	}
 
-	private JobExecution jobExecution;
+	
 	private OpcUaClient client;
 
 	
 	@EventListener(ApplicationReadyEvent.class)
 	public void initialize() {
 		try {
-			launchTaskExecutor(jobExecution);
+			launchTaskExecutor();
 		} catch (Exception e) {
 			throw new ConfigurationException(e);
 		}
 	}
 
-	public void launchTaskExecutor(JobExecution jobExecution) {
+	public void launchTaskExecutor() {
 		
 		try {
 			if(schedulingTaskLauncher != null){

@@ -1,12 +1,18 @@
 package com.virnect.smic.common.util;
 
+
+import com.virnect.smic.common.data.domain.ExecutionStatus;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TimeLogTraceUtil implements LogTrace {
+
     private static final String START_PREFIX = "-->";
     private static final String COMPLETE_PREFIX = "<--";
     private static final String EX_PREFIX = "<X-";
+
+    private static final String NO_ERROR_MESSAGE = "NO_ERR";
 
     private ThreadLocal<TraceId> traceIdHolder = new ThreadLocal<>();
 
@@ -15,8 +21,9 @@ public class TimeLogTraceUtil implements LogTrace {
         syncTraceId();
         TraceId traceId = traceIdHolder.get();
         Long startTimeMs = System.currentTimeMillis();
-        log.info("[{}] {}[class]:{} ", traceId.getId(), addSpace(START_PREFIX, traceId.getLevel()), className);
-        log.info("[{}] {}[method]:{} starts", traceId.getId(), addSpace(START_PREFIX, traceId.getLevel()), methodName);
+        //log.info("[{}] {}[class]:{} ", traceId.getId(), addSpace(START_PREFIX, traceId.getLevel()), className);
+        log.info("[{}] {} {} {} {}"
+        , traceId.getId(), methodName, ExecutionStatus.STARTED, 0, NO_ERROR_MESSAGE);
         return new TraceStatus(traceId, startTimeMs, className, methodName);
     }
 
@@ -43,23 +50,21 @@ public class TimeLogTraceUtil implements LogTrace {
         Long stopTimeMs = System.currentTimeMillis();
         long resultTimeMs = stopTimeMs - status.getStartTimeMs();
         TraceId traceId = status.getTraceId();
-        log.info("[{}] {}[class]:{} ", traceId.getId(), addSpace(COMPLETE_PREFIX, traceId.getLevel()), status.getClassName());
         if (e == null) {
-            log.info("[{}] {}[method]:{} time taken={}ms", traceId.getId(), addSpace(COMPLETE_PREFIX, traceId.getLevel()), status.getMethodName(), resultTimeMs);
+            log.info("[{}] {} {} {} {}"
+            , traceId.getId(), status.getMethodName(), ExecutionStatus.COMPLETED, resultTimeMs
+            , NO_ERROR_MESSAGE);
         } else {
-            log.info("[{}] {}[method]:{} time taken={}ms ex={}", traceId.getId(), addSpace(EX_PREFIX, traceId.getLevel()), status.getMethodName(), resultTimeMs, e.toString());
+            log.info("[{}] {} {} {} {}"
+            , traceId.getId(), status.getMethodName(), ExecutionStatus.FAILED, resultTimeMs
+            , e.toString());
         }
 
-        releaseTraceId();
+        releaseLocal();
     }
 
-    private void releaseTraceId() {
-        TraceId traceId = traceIdHolder.get();
-        if (traceId.isFirstLevel()) {
-            traceIdHolder.remove(); //destroy
-        } else {
-            traceIdHolder.set(traceId.createPreviousId());
-        }
+    private void releaseLocal() {
+        traceIdHolder.remove();
     }
 
     private static String addSpace(String prefix, int level) {

@@ -7,7 +7,7 @@
               class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
-                %white(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
+                %white(%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
             </Pattern>
         </layout>
     </appender>
@@ -18,7 +18,7 @@
         <encoder
                 class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
                 <charset>UTF-8</charset>
-            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+            <Pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} %p %C{1.} [%t] %m%n</Pattern>
         </encoder>
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -33,19 +33,42 @@
 
     </appender>
 
-    <appender name="ReadTasklet"
+    <appender name="Tasklet"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!--<file>${LOGS}/application-external-${byMinute}.log</file>-->
-        <file>${LOGS}/application-readTasklet.log</file>
+        <file>${LOGS}/application-tag.log</file>
         <encoder
                 class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <charset>UTF-8</charset>
-            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+            <Pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} %p %C{1.} [%t] %m%n</Pattern>
         </encoder>
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- rollover daily and when the file reaches 30 MegaBytes -->
-            <fileNamePattern>${LOGS}/archived/application-readTasklet-%d{yyyy-MM-dd}%d{HH-mm-ss}.%i.log
+            <fileNamePattern>${LOGS}/archived/application-tag-%d{yyyy-MM-dd}%d{HH-mm-ss}.%i.log
+            </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>30MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+
+    </appender>
+
+
+    <appender name="TimeLogging"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--<file>${LOGS}/application-external-${byMinute}.log</file>-->
+        <file>${LOGS}/application-execution.log</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <Pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} %p %C{1.} [%t] %m%n</Pattern>
+        </encoder>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily and when the file reaches 30 MegaBytes -->
+            <fileNamePattern>${LOGS}/archived/application-execution-%d{yyyy-MM-dd}%d{HH-mm-ss}.%i.log
             </fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -63,7 +86,13 @@
 
     <logger name="com.virnect.smic.common.service.tasklet.ReadTasklet"
             level="info" additivity="false">
-        <appender-ref ref="ReadTasklet"/>
+        <appender-ref ref="Tasklet"/>
+    </logger>
+
+    <logger name="com.virnect.smic.common.util.TimeLogTraceUtil"
+            level="info" additivity="false">
+        <appender-ref ref="TimeLogging"/>
+        <appender-ref ref="Console" />
     </logger>
 
 </configuration>

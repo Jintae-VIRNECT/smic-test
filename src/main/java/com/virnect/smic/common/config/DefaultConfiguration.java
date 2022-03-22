@@ -15,9 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.virnect.smic.common.config.support.SimpleJobLauncher;
 import com.virnect.smic.common.data.dao.TagRepository;
-import com.virnect.smic.common.data.dao.ModelLineRepository;
-import com.virnect.smic.common.data.domain.JobExecution;
-import com.virnect.smic.common.data.domain.ModelLine;
+import com.virnect.smic.common.data.domain.ExecutionMode;
 import com.virnect.smic.common.data.domain.Tag;
 import com.virnect.smic.common.launch.JobLauncher;
 import com.virnect.smic.common.util.LogTrace;
@@ -27,29 +25,28 @@ import com.virnect.smic.common.util.TimeLogTraceUtil;
 @Configuration
 public class DefaultConfiguration {
 	private final SimpleJobLauncher jobLauncher;
-	private final ModelLineRepository taskRepository;
 	private final TagRepository tagRepository;
-	
-	private JobExecution jobExecution;
+	private final Environment env;
 
 	public DefaultConfiguration(SimpleJobLauncher jobLauncher,// @Lazy SimpleTaskLauncher simpleTaskLauncher,
-	ModelLineRepository taskRepository, TagRepository tagRepository, Environment env) {
+	 TagRepository tagRepository, Environment env) {
 		this.jobLauncher = jobLauncher;
-		this.taskRepository = taskRepository;
 		this.tagRepository = tagRepository;	
+		this.env = env;
 	}
 
 
 	@Bean
     public LogTrace logTrace(){
-        return new TimeLogTraceUtil();
+		TimeLogTraceUtil logtrace = new TimeLogTraceUtil();
+        return logtrace;
     }
 
-	@Bean (name="models")
-	public List<ModelLine> taskList(){
-		List<ModelLine> models =  taskRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
-		return Collections.synchronizedList(models);
-	}
+	// @Bean (name="models")
+	// public List<ModelLine> taskList(){
+	// 	List<ModelLine> models =  taskRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+	// 	return Collections.synchronizedList(models);
+	// }
 
 	@Bean (name="tagList")
 	public List<Tag> tagList(){
@@ -63,7 +60,7 @@ public class DefaultConfiguration {
 	@EventListener(ApplicationReadyEvent.class)
 	public void initialize() {
 		try {
-			jobExecution =  jobLauncher.run();
+			jobLauncher.run(getExecutionMode());
 			//launchTaskExecutor(jobExecution);
 		} catch (Exception e) {
 			throw new ConfigurationException(e);
@@ -72,5 +69,14 @@ public class DefaultConfiguration {
 
 	public JobLauncher getJobLauncher() {
 		return jobLauncher;
+	}
+
+	@Bean (name = "executionMode")
+	public ExecutionMode getExecutionMode() {
+		if(env.getProperty("server.daemon").equalsIgnoreCase("true")){
+			return ExecutionMode.DAEMON;
+		}else{
+			return ExecutionMode.SERVER;
+		}
 	}
 }

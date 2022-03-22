@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import com.virnect.smic.common.config.annotation.TimeLogTrace;
 import com.virnect.smic.common.data.domain.ExecutionStatus;
 import com.virnect.smic.common.data.domain.Tag;
 import com.virnect.smic.daemon.mq.ProducerManager;
@@ -65,7 +66,7 @@ public class ReadTasklet {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.error("*******************  exception occurred at " +  tag.toString());
+			log.error(" exception occurred at " +  tag.toString());
 			throw new IllegalStateException();
 		} finally{
 			nodeIdHolder.remove();
@@ -73,7 +74,9 @@ public class ReadTasklet {
 		}
 	}
 
-	public ConcurrentHashMap<String, String> readAndPublishAsync(List<Tag> tags, OpcUaClient client, boolean isPub){
+	@TimeLogTrace
+	public ConcurrentHashMap<String, String> readAndPublishAsync(List<Tag> tags
+		, OpcUaClient client, boolean isPub, String uuid){
 		counter.incrementAndGet();
 
 		Queue<NodeId> nodes = getNodeIds(tags);
@@ -86,9 +89,9 @@ public class ReadTasklet {
 		ConcurrentHashMap<String, String> result  = getResultMap(nodes, Collections.synchronizedList(dataValues));
 
 		if(isPub){
-			publishAndLogAsync(result);
+			publishAndLogAsync(result, uuid);
 		} else {
-			logResult(result);
+			logResult(result, uuid);
 		}
 		
 		return result;
@@ -121,7 +124,7 @@ public class ReadTasklet {
 		return result;
 	}
 
-	private void publishAndLogAsync(ConcurrentHashMap<String, String> result){
+	private void publishAndLogAsync(ConcurrentHashMap<String, String> result, String uuid){
 		result.entrySet().parallelStream().forEach(item->{
 			ExecutionStatus status = ExecutionStatus.UNKNOWN;
 			try {
@@ -131,15 +134,24 @@ public class ReadTasklet {
 				e.printStackTrace();
 				status = ExecutionStatus.FAILED;
 			} finally {
-				log.info("{} {} {} {}", counter.get(), item.getKey().replaceAll(" ", ""), item.getValue().toString(), status);
+				log.info("[{}] {} {} {} {}"
+				, uuid
+				, counter.get()
+				, item.getKey().replaceAll(" ", "")
+				, item.getValue().toString()
+				, status);
 			}
 		});
 		
 	}
 
-	private void logResult(ConcurrentHashMap<String, String> result){
+	private void logResult(ConcurrentHashMap<String, String> result, String uuid){
 		result.entrySet().parallelStream().forEach(item->{
-				log.info("{} {} {} {}", counter.get(), item.getKey().replaceAll(" ", ""), item.getValue().toString(), "READONLY");
+				log.info("[{}] {} {} {} {}"
+				, uuid
+				, counter.get()
+				, item.getKey().replaceAll(" ", "")
+				, item.getValue().toString(), "READONLY");
 		});
 	}
 	
