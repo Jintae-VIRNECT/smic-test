@@ -10,8 +10,10 @@ import com.virnect.smic.server.data.error.ErrorCode;
 import com.virnect.smic.server.data.error.ErrorResponseMessage;
 
 import org.eclipse.milo.opcua.stack.core.channel.messages.ErrorMessage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpMethod;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,9 @@ public class SwaggerConfig {
     String title = "VIRNECT SMIC API Document.";
     String version = "v1.0";
 
+    @Value("${management.server.port}")
+    private int serverPort;
+
     @Bean
 	public List<Response> globalResponseMessage() {
 		ArrayList<Response> response = new ArrayList<>();
@@ -60,12 +65,14 @@ public class SwaggerConfig {
 
     @Bean
     public Docket api() {
+        
         return new Docket(DocumentationType.OAS_30)
                 .useDefaultResponseMessages(false)
                 .globalResponses(HttpMethod.GET, globalResponseMessage())
 			    .globalResponses(HttpMethod.POST, globalResponseMessage())
 			    .globalResponses(HttpMethod.PUT, globalResponseMessage())
 			    .globalResponses(HttpMethod.DELETE, globalResponseMessage())
+                //.host("localhost:" + serverPort)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.virnect.smic.server"))
                 .paths(PathSelectors.any())

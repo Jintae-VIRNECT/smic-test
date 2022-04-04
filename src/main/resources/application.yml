@@ -1,10 +1,10 @@
 server:
-  port: 8090
+  port: 8080
   daemon: true
     
 spring:
   application:
-    name: remote-service-server-local
+    name: smic-server-1
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/smic?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
@@ -22,6 +22,20 @@ spring:
         use_sql_comments: false
     show-sql: true
 
+# springdoc:
+#   use-management-port: true
+#   show-actuator: true
+#   api-docs.path: /swaggerui
+
+management:
+  server:
+    port: 8090
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  metrics.tags.application: ${spring.application.name}
+  
 logging:
   level:
     root: info

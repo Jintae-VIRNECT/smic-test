@@ -68,6 +68,8 @@ public class Tag {
 
 	private String dataRange;
 
+	private String queueName;
+
 	@ManyToOne(fetch = FetchType.EAGER, optional = false)
 	@JoinColumn(name="model_line_id")
 	private ModelLine modelLine;
@@ -91,6 +93,7 @@ public class Tag {
 			", deviceDataType='" + deviceDataType + '\'' +
 			", unit='" + unit + '\'' +
 			", dataRange='" + dataRange + '\'' +
+			", queueName='" + queueName + '\'' +
 			", modelLine=" + modelLine +
 			'}';
 	}

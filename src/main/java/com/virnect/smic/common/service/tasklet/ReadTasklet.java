@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -79,26 +80,26 @@ public class ReadTasklet {
 		, OpcUaClient client, boolean isPub, String uuid){
 		counter.incrementAndGet();
 
-		Queue<NodeId> nodes = getNodeIds(tags);
+		ConcurrentLinkedQueue<NodeId> nodes = getNodeIds(tags);
 
 		CompletableFuture<List<DataValue>> cfData 
 		= client.readValues(0, TimestampsToReturn.Both, nodes.stream().collect(Collectors.toCollection(ArrayList::new)));
 
 		List<DataValue> dataValues= cfData.join();
 
-		ConcurrentHashMap<String, String> result  = getResultMap(nodes, Collections.synchronizedList(dataValues));
+		ConcurrentHashMap<String, String> result  = getResultMap(tags, Collections.synchronizedList(dataValues), nodes);
 
 		if(isPub){
-			publishAndLogAsync(result, uuid);
+			publishAndLogAsync(result, uuid, tags);
 		} else {
-			logResult(result, uuid);
+			logResult(result, uuid, tags);
 		}
 		
 		return result;
     }
 
-	private Queue<NodeId> getNodeIds(List<Tag> tags){
-		Queue<NodeId> nodeIds = new ConcurrentLinkedQueue<NodeId>();
+	private ConcurrentLinkedQueue<NodeId> getNodeIds(List<Tag> tags){
+		ConcurrentLinkedQueue<NodeId> nodeIds = new ConcurrentLinkedQueue<NodeId>();
 		tags.parallelStream()
 			.map(tag->tag.getNodeId())
 			.forEach(
@@ -108,50 +109,60 @@ public class ReadTasklet {
 		return nodeIds;
 	}
 
-	private ConcurrentHashMap<String, String> getResultMap(Queue<NodeId> nodes, List<DataValue> dataValues){
+	private ConcurrentHashMap<String, String> getResultMap(List<Tag> tags
+		, List<DataValue> dataValues
+		, ConcurrentLinkedQueue<NodeId> nodes){
 		ConcurrentHashMap<String, String> result = new ConcurrentHashMap<>();
+
 		dataValues.forEach(
 			value-> {
 				String nodeId = nodes.poll().getIdentifier().toString();
+				String queueName = tags.parallelStream().filter(t->t.getNodeId().equals(nodeId)).map(t->t.getQueueName()).findFirst().get();
 				String dataValue = "";
 				if(value.getValue().getValue()!= null){
 					dataValue =  value.getValue().getValue().toString();
 				}
-				result.put(nodeId, dataValue);	
+				result.put(queueName, dataValue);
+
 			}
+
 		);
 
 		return result;
 	}
 
-	private void publishAndLogAsync(ConcurrentHashMap<String, String> result, String uuid){
-		result.entrySet().parallelStream().forEach(item->{
+	private void publishAndLogAsync(ConcurrentHashMap<String, String> result, String uuid, List<Tag> tags){
+		result.entrySet().stream().forEach(item->{
 			ExecutionStatus status = ExecutionStatus.UNKNOWN;
 			try {
-				status = producerManager.runProducer(1, item.getKey().replaceAll(" ", ""), item.getValue().toString());
+				status = producerManager.runProducer(1, item.getKey(), item.getValue().toString());
 				
 			} catch (IOException e) {
 				e.printStackTrace();
 				status = ExecutionStatus.FAILED;
 			} finally {
-				log.info("[{}] {} {} {} {}"
+				log.info("[{}] {} {} [{}] {} [{}]"
 				, uuid
 				, counter.get()
-				, item.getKey().replaceAll(" ", "")
+				//, nodes.poll().getIdentifier().toString().replaceAll(" ", "")
+					, tags.parallelStream().filter(t->t.getQueueName().equals(item.getKey())).map(t->t.getNodeId()).findFirst().get()
 				, item.getValue().toString()
-				, status);
+				, status
+				, item.getKey());
 			}
 		});
 		
 	}
 
-	private void logResult(ConcurrentHashMap<String, String> result, String uuid){
-		result.entrySet().parallelStream().forEach(item->{
-				log.info("[{}] {} {} {} {}"
+	private void logResult(ConcurrentHashMap<String, String> result, String uuid, List<Tag> tags){
+		result.entrySet().stream().forEach(item->{
+				log.info("[{}] {} {} [{}] {} [{}]"
 				, uuid
 				, counter.get()
-				, item.getKey().replaceAll(" ", "")
-				, item.getValue().toString(), "READONLY");
+				//, nodes.poll().getIdentifier().toString().replaceAll(" ", "")
+					, tags.parallelStream().filter(t->t.getQueueName().equals(item.getKey())).map(t->t.getNodeId()).findFirst().get()
+				, item.getValue().toString(), "READONLY"
+				, item.getKey());
 		});
 	}
 	

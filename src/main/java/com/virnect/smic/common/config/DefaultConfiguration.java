@@ -52,9 +52,9 @@ public class DefaultConfiguration {
 	public List<Tag> tagList(){
 		List<Tag> tags =  tagRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
 			.stream()
-            .filter(tag -> tag.getModelLine().getId() < 99 )
+            .filter(tag -> tag.isActivated())
 			.collect(Collectors.toList());
-		return Collections.synchronizedList(tags);
+		return Collections.synchronizedList(getQueueNamedTag(tags));
 	}
 
 	@EventListener(ApplicationReadyEvent.class)
@@ -78,5 +78,30 @@ public class DefaultConfiguration {
 		}else{
 			return ExecutionMode.SERVER;
 		}
+	}
+
+	private List<Tag> getQueueNamedTag(List<Tag> tags){
+		tags.forEach(t -> t.setQueueName(makeQueueName(t)));
+		return tags;
+	}
+
+	private String makeQueueName(Tag tag){
+		StringBuilder sb = new StringBuilder();
+		sb.append(tag.getModelLine().getName());
+		sb.append(".");
+		sb.append(tag.getMainCategory());
+		sb.append(".");
+		sb.append(tag.getSubCategory());
+
+		if(tag.getSub2Category() != null && !tag.getSub2Category().isBlank()){
+			sb.append(".");
+			sb.append(tag.getSub2Category());
+		}
+
+		if(tag.getEtc() != null && !tag.getEtc().isBlank()){
+			sb.append(".");
+			sb.append(tag.getEtc());
+		}
+		return sb.toString();
 	}
 }

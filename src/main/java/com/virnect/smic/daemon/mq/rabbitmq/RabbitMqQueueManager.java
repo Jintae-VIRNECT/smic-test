@@ -27,15 +27,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RabbitMqQueueManager implements TopicManager{
 
-    // @Autowired
-	// @Qualifier("tagList")
     private final List<Tag> tagList;
 
     private final Environment env;
 
     public void create() throws IOException, TimeoutException {
 
-        List<String> tags = tagList.stream().map(o-> o.getNodeId()).collect(Collectors.toList());
+        List<String> tags = tagList.stream().map(o-> o.getQueueName()).collect(Collectors.toList());
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(env.getProperty("mq.rabbitmq.host"));
@@ -43,9 +41,9 @@ public class RabbitMqQueueManager implements TopicManager{
         try (Connection connection = factory.newConnection();
             Channel channel = connection.createChannel()) {
                 
-                tags.forEach(tag-> {
+                tags.forEach(queueName-> {
                     try {
-                        String queueName = tag.replaceAll(" ", "");
+                        //String queueName = tag.replaceAll(" ", "");
                         channel.exchangeDeclare("amq.topic", "topic", true, false, null);
                         Map<String, Object> args = new HashMap<String, Object>();
                         args.put("max-length", 1);
