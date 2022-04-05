@@ -26,14 +26,6 @@ public class SimpleTaskLauncher implements DisposableBean {
 
 	private final ReadTasklet tasklet;
 
-	// @Autowired
-	// @Qualifier("modelList")
-    // private List<ModelLine> modelLines;
-
-	@Autowired
-	@Qualifier("tagList")
-    private List<Tag> tags;
-
 	private OpcUaClient client;
 
 	public SimpleTaskLauncher( ReadTasklet tasklet){
@@ -60,7 +52,7 @@ public class SimpleTaskLauncher implements DisposableBean {
 	}
 
 	private void runOneTimeWithTaskExec(OpcUaClient client){
-		tasklet.readAndPublishAsync(tags, getClient(), true, null);
+		tasklet.readAndPublishAsync(getClient(), true, null);
 	}
 
 	@Override

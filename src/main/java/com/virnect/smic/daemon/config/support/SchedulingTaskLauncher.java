@@ -43,6 +43,6 @@ public class SchedulingTaskLauncher{
 	@Scheduled(fixedDelay = 1000, initialDelay = 5000)
 	void runScheduledFixedDelay(){
 		if(getClient()!= null )
-			tasklet.readAndPublishAsync(tags, getClient(), true, null);
+			tasklet.readAndPublishAsync(getClient(), true, null);
 	}
 }

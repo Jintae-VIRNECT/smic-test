@@ -31,7 +31,7 @@ public class TimeLogTraceAspect {
 
                 // pass UUID
                 Object[] args = joinPoint.getArgs();
-                args[3] = status.getTraceId().getId();
+                args[2] = status.getTraceId().getId();
 
                 try {
                     result =  joinPoint.proceed(args);

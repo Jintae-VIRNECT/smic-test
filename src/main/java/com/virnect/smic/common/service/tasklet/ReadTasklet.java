@@ -4,6 +4,8 @@ import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -14,9 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -37,7 +37,15 @@ public class ReadTasklet {
 	private ThreadLocal<String> nodeIdHolder = new ThreadLocal<>();
 	private ThreadLocal<DataValue> valueHolder = new ThreadLocal<>();
 	private Tag tag;
-	
+
+	@Autowired
+	@Qualifier("tagList")
+	private List<Tag> tags;
+
+	@Autowired
+	@Qualifier("queueNameMap")
+	private ConcurrentHashMap<String, String> queueNameMap;
+
 	private final AtomicInteger counter = new AtomicInteger(0);
 	private final ProducerManager producerManager;
 	
@@ -76,29 +84,28 @@ public class ReadTasklet {
 	}
 
 	@TimeLogTrace
-	public ConcurrentHashMap<String, String> readAndPublishAsync(List<Tag> tags
-		, OpcUaClient client, boolean isPub, String uuid){
+	public ConcurrentHashMap<String, String> readAndPublishAsync(OpcUaClient client, boolean isPub, String uuid){
 		counter.incrementAndGet();
 
-		ConcurrentLinkedQueue<NodeId> nodes = getNodeIds(tags);
+		ConcurrentLinkedQueue<NodeId> nodes = getNodeIds();
 
 		CompletableFuture<List<DataValue>> cfData 
 		= client.readValues(0, TimestampsToReturn.Both, nodes.stream().collect(Collectors.toCollection(ArrayList::new)));
 
 		List<DataValue> dataValues= cfData.join();
 
-		ConcurrentHashMap<String, String> result  = getResultMap(tags, Collections.synchronizedList(dataValues), nodes);
+		ConcurrentHashMap<String, String> result  = getResultMap(Collections.synchronizedList(dataValues), nodes);
 
 		if(isPub){
-			publishAndLogAsync(result, uuid, tags);
+			publishAndLogAsync(result, uuid);
 		} else {
-			logResult(result, uuid, tags);
+			logResult(result, uuid);
 		}
 		
 		return result;
     }
 
-	private ConcurrentLinkedQueue<NodeId> getNodeIds(List<Tag> tags){
+	private ConcurrentLinkedQueue<NodeId> getNodeIds(){
 		ConcurrentLinkedQueue<NodeId> nodeIds = new ConcurrentLinkedQueue<NodeId>();
 		tags.parallelStream()
 			.map(tag->tag.getNodeId())
@@ -109,8 +116,7 @@ public class ReadTasklet {
 		return nodeIds;
 	}
 
-	private ConcurrentHashMap<String, String> getResultMap(List<Tag> tags
-		, List<DataValue> dataValues
+	private ConcurrentHashMap<String, String> getResultMap(List<DataValue> dataValues
 		, ConcurrentLinkedQueue<NodeId> nodes){
 		ConcurrentHashMap<String, String> result = new ConcurrentHashMap<>();
 
@@ -131,11 +137,11 @@ public class ReadTasklet {
 		return result;
 	}
 
-	private void publishAndLogAsync(ConcurrentHashMap<String, String> result, String uuid, List<Tag> tags){
+	void publishAndLogAsync(ConcurrentHashMap<String, String> result, String uuid){
 		result.entrySet().stream().forEach(item->{
 			ExecutionStatus status = ExecutionStatus.UNKNOWN;
 			try {
-				status = producerManager.runProducer(1, item.getKey(), item.getValue().toString());
+				status = producerManager.runProducer(1, item.getKey(), item.getValue());
 				
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -144,9 +150,8 @@ public class ReadTasklet {
 				log.info("[{}] {} {} [{}] {} [{}]"
 				, uuid
 				, counter.get()
-				//, nodes.poll().getIdentifier().toString().replaceAll(" ", "")
-					, tags.parallelStream().filter(t->t.getQueueName().equals(item.getKey())).map(t->t.getNodeId()).findFirst().get()
-				, item.getValue().toString()
+					, queueNameMap.get(item.getKey())
+				, item.getValue()
 				, status
 				, item.getKey());
 			}
@@ -154,16 +159,19 @@ public class ReadTasklet {
 		
 	}
 
-	private void logResult(ConcurrentHashMap<String, String> result, String uuid, List<Tag> tags){
+	void logResult(ConcurrentHashMap<String, String> result, String uuid){
 		result.entrySet().stream().forEach(item->{
 				log.info("[{}] {} {} [{}] {} [{}]"
 				, uuid
 				, counter.get()
-				//, nodes.poll().getIdentifier().toString().replaceAll(" ", "")
-					, tags.parallelStream().filter(t->t.getQueueName().equals(item.getKey())).map(t->t.getNodeId()).findFirst().get()
-				, item.getValue().toString(), "READONLY"
+					, queueNameMap.get(item.getKey())
+				, item.getValue(), "READONLY"
 				, item.getKey());
 		});
 	}
-	
+
+	public ConcurrentHashMap<String, String> readAndPublishAsync(List<Tag> tags, OpcUaClient client, boolean isPub, String uuid) {
+		this.setTags(tags);
+		return readAndPublishAsync(client, isPub, uuid);
+	}
 }

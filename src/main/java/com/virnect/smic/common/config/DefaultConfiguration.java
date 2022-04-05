@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,14 @@ public class DefaultConfiguration {
 	// 	List<ModelLine> models =  taskRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
 	// 	return Collections.synchronizedList(models);
 	// }
+
+	@Bean (name="queueNameMap")
+	public ConcurrentHashMap<String, String> queueNameMap(){
+		ConcurrentHashMap<String, String> queueNameMap = new ConcurrentHashMap<>();
+		List<Tag> tags = tagList();
+		tags.stream().forEach(tag->queueNameMap.put(tag.getQueueName(), tag.getNodeId()));
+		return queueNameMap;
+	}
 
 	@Bean (name="tagList")
 	public List<Tag> tagList(){
