@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -120,16 +121,17 @@ public class ReadTasklet {
 		, ConcurrentLinkedQueue<NodeId> nodes){
 		ConcurrentHashMap<String, String> result = new ConcurrentHashMap<>();
 
-		dataValues.forEach(
+		dataValues.parallelStream().forEachOrdered(
 			value-> {
 				String nodeId = nodes.poll().getIdentifier().toString();
-				String queueName = tags.parallelStream().filter(t->t.getNodeId().equals(nodeId)).map(t->t.getQueueName()).findFirst().get();
-				String dataValue = "";
-				if(value.getValue().getValue()!= null){
-					dataValue =  value.getValue().getValue().toString();
+				Optional<String> queueName = queueNameMap.entrySet().parallelStream().filter(e->e.getValue().equals(nodeId)).map(e->e.getKey()).findFirst();
+				if(queueName.isPresent()){
+					String dataValue = "";
+					if(value.getValue().getValue()!= null){
+						dataValue =  value.getValue().getValue().toString();
+					}
+					result.put(queueName.get(), dataValue);
 				}
-				result.put(queueName, dataValue);
-
 			}
 
 		);
@@ -170,7 +172,8 @@ public class ReadTasklet {
 		});
 	}
 
-	public ConcurrentHashMap<String, String> readAndPublishAsync(List<Tag> tags, OpcUaClient client, boolean isPub, String uuid) {
+	@TimeLogTrace
+	public ConcurrentHashMap<String, String> readAndPublishAsync(OpcUaClient client, boolean isPub, String uuid, List<Tag> tags) {
 		this.setTags(tags);
 		return readAndPublishAsync(client, isPub, uuid);
 	}

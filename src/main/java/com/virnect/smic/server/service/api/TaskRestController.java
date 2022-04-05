@@ -5,6 +5,9 @@ import com.virnect.smic.server.data.dto.response.TagValueListResponse;
 import com.virnect.smic.server.service.application.TaskService;
 
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +28,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequiredArgsConstructor
 @RequestMapping("/tasks")
 @Tag(name="task", description = "task API")
+@PropertySource("classpath:application.yml")
+@ConditionalOnProperty(prefix="server",name="daemon", havingValue= "false")
 public class TaskRestController {
     private final TaskService taskService;
     private static final String TAG = TaskRestController.class.getSimpleName();
