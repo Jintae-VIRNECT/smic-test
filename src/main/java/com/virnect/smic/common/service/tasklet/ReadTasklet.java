@@ -124,7 +124,12 @@ public class ReadTasklet {
 		dataValues.parallelStream().forEachOrdered(
 			value-> {
 				String nodeId = nodes.poll().getIdentifier().toString();
-				Optional<String> queueName = queueNameMap.entrySet().parallelStream().filter(e->e.getValue().equals(nodeId)).map(e->e.getKey()).findFirst();
+				Optional<String> queueName = queueNameMap.entrySet()
+					.parallelStream()
+					.filter(e->e.getValue().equals(nodeId))
+					.map(e->e.getKey())
+					.findFirst();
+
 				if(queueName.isPresent()){
 					String dataValue = "";
 					if(value.getValue().getValue()!= null){
@@ -133,7 +138,6 @@ public class ReadTasklet {
 					result.put(queueName.get(), dataValue);
 				}
 			}
-
 		);
 
 		return result;

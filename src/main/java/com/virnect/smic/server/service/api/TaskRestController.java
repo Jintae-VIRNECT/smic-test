@@ -28,8 +28,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequiredArgsConstructor
 @RequestMapping("/tasks")
 @Tag(name="task", description = "task API")
-@PropertySource("classpath:application.yml")
-@ConditionalOnProperty(prefix="server",name="daemon", havingValue= "false")
+// @PropertySource("classpath:application.yml")
+// @ConditionalOnProperty(prefix="server",name="daemon", havingValue= "false")
 public class TaskRestController {
     private final TaskService taskService;
     private static final String TAG = TaskRestController.class.getSimpleName();
