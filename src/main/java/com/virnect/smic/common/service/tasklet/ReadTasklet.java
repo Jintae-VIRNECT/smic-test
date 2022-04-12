@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import com.virnect.smic.common.config.annotation.TimeLogTrace;
 import com.virnect.smic.common.data.domain.ExecutionStatus;
 import com.virnect.smic.common.data.domain.Tag;
+import com.virnect.smic.common.data.dto.TagDto;
 import com.virnect.smic.daemon.mq.ProducerManager;
 
 @Slf4j
@@ -41,7 +42,7 @@ public class ReadTasklet {
 
 	@Autowired
 	@Qualifier("tagList")
-	private List<Tag> tags;
+	private List<TagDto> tags;
 
 	@Autowired
 	@Qualifier("queueNameMap")
@@ -177,7 +178,8 @@ public class ReadTasklet {
 	}
 
 	@TimeLogTrace
-	public ConcurrentHashMap<String, String> readAndPublishAsync(OpcUaClient client, boolean isPub, String uuid, List<Tag> tags) {
+	public ConcurrentHashMap<String, String> readAndPublishAsync(OpcUaClient client,
+		boolean isPub, String uuid, List<TagDto> tags) {
 		this.setTags(tags);
 		return readAndPublishAsync(client, isPub, uuid);
 	}

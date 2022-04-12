@@ -1,9 +1,11 @@
 package com.virnect.smic.daemon.config.support;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import com.virnect.smic.common.config.annotation.OpcUaConnection;
 import com.virnect.smic.common.data.domain.Tag;
+import com.virnect.smic.common.data.dto.TagDto;
 import com.virnect.smic.common.service.tasklet.ReadTasklet;
 
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
@@ -21,18 +23,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter @Setter
 @RequiredArgsConstructor
-public class SchedulingTaskLauncher{
+public class SchedulingTaskLauncher {
 
     private OpcUaClient client;
 
-    private final ReadTasklet tasklet;
-
-    @Autowired
-    private TaskScheduler scheduler;
-
 	@Autowired
-	@Qualifier("tagList")
-    private List<Tag> tags;
+    private ReadTasklet tasklet;
+
+	// @Autowired
+	// @Qualifier("tagList")
+    // private List<TagDto> tags;
 
     @OpcUaConnection
     public void run(OpcUaClient client) {
@@ -40,7 +40,7 @@ public class SchedulingTaskLauncher{
     }
     
     @Async
-	@Scheduled(fixedDelay = 1000, initialDelay = 5000)
+	@Scheduled(fixedDelay = 200, initialDelay = 5000)
 	void runScheduledFixedDelay(){
 		if(getClient()!= null )
 			tasklet.readAndPublishAsync(getClient(), true, null);

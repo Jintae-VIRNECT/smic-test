@@ -73,8 +73,7 @@ public class RabbitMqProducerManager implements ProducerManager {
 
     public ExecutionStatus runProducer(int i, String queueName, String value) {
         try {
-
-            //producer.basicPublish("amq.topic", queueName, true, null, value.getBytes("UTF-8") );
+            producer.basicPublish("amq.topic", queueName, true, null, value.getBytes("UTF-8") );
             return ExecutionStatus.COMPLETED;
         } catch (Exception e) {
             e.printStackTrace();

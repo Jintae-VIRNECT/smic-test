@@ -26,9 +26,7 @@ public abstract class BaseTimeEntity {
     @LastModifiedDate
     private LocalDateTime updatedDate;
 
-    @Column(name= "stopped_at")
-    private LocalDateTime stopedDate;
+    @Column(name= "destroyed_at")
+    private LocalDateTime destroyedDate;
 
-    @Column(name = "completed_at")
-    private LocalDateTime completedDate;
 }

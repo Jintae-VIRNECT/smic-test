@@ -4,6 +4,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,8 @@ import com.virnect.smic.common.config.connection.NoConnectionAvailableException;
 @Order(3)
 @Component
 public class OpcUaConnectionAspect {
+	@Autowired
+	ConnectionPoolImpl pool;
 
 	OpcUaClient client;
 	private final int MAX_RETRY = 4;
@@ -29,7 +32,7 @@ public class OpcUaConnectionAspect {
 		Object[] args = joinPoint.getArgs();
 		log.info("[befoer connection] {} args={}", joinPoint.getSignature(), args );
 
-		ConnectionPoolImpl pool = ConnectionPoolImpl.getInstance();
+		//ConnectionPoolImpl pool = ConnectionPoolImpl.getInstance();
 
 		AtomicInteger count = new AtomicInteger(0);
 		while(count.get()< MAX_RETRY){

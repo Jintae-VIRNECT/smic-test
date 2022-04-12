@@ -39,14 +39,24 @@ management:
 logging:
   level:
     root: info
-    com.virnect.smic.daemon.service.tasklet: debug
-    
-opc-server:
-  # host: 35.232.112.205
-  # port: 8932
-  pool-size: 3
-  host: 222.98.122.50
-  port: 4850
+    com.virnect.smic.daemon.service.tasklet: info
+
+smic:
+  opc-server:
+    # host: 35.232.112.205
+    # port: 8932
+    pool-size: 3
+    host: 222.98.122.50
+    port: 4850
+  kiosk:
+    user-id: kiosk1
+    password: kiosk1234567890
+#    organization-name: %26%23x3164;
+    host: 222.98.122.37
+    port: 9530
+    login-uri: Thingworx/action-login
+    plan-uri: Thingworx/Things/EF.OrderMashupQuery.TH/Services/SelectPlanNameToday
+    order-uri: Thingworx/Things/EF.OrderMashupManagement.TH/Services/InsertOrder
 
 mq: 
   queue-manager: rabbitmq

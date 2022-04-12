@@ -17,6 +17,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 
 import com.virnect.smic.common.data.domain.Tag;
+import com.virnect.smic.common.data.dto.TagDto;
 
 @SpringBootTest
 class ReadTaskletTest{
@@ -24,7 +25,7 @@ class ReadTaskletTest{
 	@Autowired
 	private ReadTasklet readTasklet;
 
-	private List<Tag> tags;
+	private List<TagDto> tags;
 	private ConcurrentHashMap<String, String> resultWithErrors;
 
 	private void setErrorResultMap(){

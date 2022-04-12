@@ -13,6 +13,7 @@ import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfigBuilder;
 import org.eclipse.milo.opcua.stack.client.DiscoveryClient;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
 import org.eclipse.milo.opcua.stack.core.util.EndpointUtil;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -22,30 +23,35 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class ConnectionPoolImpl implements ConnectionPool {
+//@RequiredArgsConstructor
+public class ConnectionPoolImpl implements ConnectionPool, InitializingBean {
 
     private static Environment env;
     
     private static BlockingQueue<Optional<OpcUaClient>> connectionPool;
     private static BlockingQueue<OpcUaClient> usedConnection;
 
-    private static class ConnectionPoolHolder {
-
-        private static final ConnectionPoolImpl INSTANCE = create();
+    @Override
+    public void afterPropertiesSet() throws Exception {
+       create();
     }
 
-    public static ConnectionPoolImpl getInstance(){
-        return ConnectionPoolHolder.INSTANCE;
-    }
+    // private static class ConnectionPoolHolder {
+    //
+    //     private static final ConnectionPoolImpl INSTANCE = new ConnectionPoolImpl(env);//create();
+    // }
+    //
+    // public static ConnectionPoolImpl getInstance(){
+    //     return ConnectionPoolHolder.INSTANCE;
+    // }
 
     @Autowired
     private ConnectionPoolImpl(Environment env){
         this.env = env;
     }
 
-    private static ConnectionPoolImpl create() {
-        int initialPoolSize = Integer.parseInt(env.getProperty("opc-server.pool-size"));
+    private static void create() {
+        int initialPoolSize = Integer.parseInt(env.getProperty("smic.opc-server.pool-size"));
         connectionPool = new LinkedBlockingDeque<>(initialPoolSize);
         usedConnection = new LinkedBlockingDeque<>(initialPoolSize);
         
@@ -54,7 +60,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
         }
 
         log.info("static pool created");
-        return new ConnectionPoolImpl(env);
+        //return new ConnectionPoolImpl(env);
     }
 
     @Override
@@ -103,8 +109,8 @@ public class ConnectionPoolImpl implements ConnectionPool {
 
     private static OpcUaClient createConnection() {
 
-         final String SERVER_HOSTNAME = env.getProperty("opc-server.host");
-         final int SERVER_PORT = Integer.parseInt(env.getProperty("opc-server.port"));
+         final String SERVER_HOSTNAME = env.getProperty("smic.opc-server.host");
+         final int SERVER_PORT = Integer.parseInt(env.getProperty("smic.opc-server.port"));
 
         try {
             List<EndpointDescription> endpoints
@@ -126,7 +132,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
     }
 
     private void logConnectionStatus(String methodName){
-        int initialPoolSize = Integer.parseInt(env.getProperty("opc-server.pool-size"));
+        int initialPoolSize = Integer.parseInt(env.getProperty("smic.opc-server.pool-size"));
         log.debug(methodName + "called. connectionPool's available capacity : " 
             + (initialPoolSize - connectionPool.remainingCapacity()));
         log.debug(methodName + "called. usedPool's current capacity : " 

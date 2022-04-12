@@ -11,6 +11,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.virnect.smic.common.data.domain.Tag;
+import com.virnect.smic.common.data.dto.TagDto;
 import com.virnect.smic.daemon.mq.TopicManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RabbitMqQueueManager implements TopicManager{
 
-    private final List<Tag> tagList;
+    private final List<TagDto> tagList;
 
     private final Environment env;
 

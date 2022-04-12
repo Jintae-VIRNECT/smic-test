@@ -20,6 +20,6 @@ public class SchedulingConfiguration {
     @Bean
     @ConditionalOnProperty(prefix="server",name="daemon", havingValue= "true")
     SchedulingTaskLauncher schedulingTaskLauncher(){
-        return new SchedulingTaskLauncher(tasklet);
+        return new SchedulingTaskLauncher();
     }
 }

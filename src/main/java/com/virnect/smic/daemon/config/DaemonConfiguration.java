@@ -15,6 +15,7 @@ import java.util.List;
 import com.virnect.smic.common.config.ConfigurationException;
 import com.virnect.smic.common.data.dao.TagRepository;
 import com.virnect.smic.common.data.domain.Tag;
+import com.virnect.smic.common.data.dto.TagDto;
 import com.virnect.smic.daemon.config.support.SchedulingTaskLauncher;
 import com.virnect.smic.daemon.mq.TopicManager;
 import com.virnect.smic.daemon.mq.kafka.KafkaTopicManager;
@@ -28,7 +29,7 @@ public class DaemonConfiguration {
 
 	@Autowired
 	@Qualifier("tagList")
-    private List<Tag> tags;
+    private List<TagDto> tags;
 
 	private TopicManager topicManager;
 
@@ -45,7 +46,7 @@ public class DaemonConfiguration {
 	private OpcUaClient client;
 
 	
-	@EventListener(ApplicationReadyEvent.class)
+	//@EventListener(ApplicationReadyEvent.class)
 	public void initialize() {
 		try {
 			launchTaskExecutor();
@@ -76,5 +77,9 @@ public class DaemonConfiguration {
 		}
 
 		topicManager.create();
+	}
+
+	public void stopTaskExecutor(){
+		schedulingTaskLauncher.setClient(null);
 	}
 }

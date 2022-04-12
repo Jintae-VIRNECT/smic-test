@@ -5,19 +5,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
-import org.springframework.data.domain.Sort;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 
 import com.virnect.smic.common.config.support.SimpleJobLauncher;
 import com.virnect.smic.common.data.dao.TagRepository;
 import com.virnect.smic.common.data.domain.ExecutionMode;
-import com.virnect.smic.common.data.domain.Tag;
+import com.virnect.smic.common.data.dto.TagDto;
 import com.virnect.smic.common.launch.JobLauncher;
 import com.virnect.smic.common.util.LogTrace;
 import com.virnect.smic.common.util.TimeLogTraceUtil;
@@ -30,9 +28,10 @@ public class DefaultConfiguration {
 	private final Environment env;
 
 	public DefaultConfiguration(SimpleJobLauncher jobLauncher,// @Lazy SimpleTaskLauncher simpleTaskLauncher,
-	 TagRepository tagRepository, Environment env) {
+	 TagRepository tagRepository,
+		Environment env) {
 		this.jobLauncher = jobLauncher;
-		this.tagRepository = tagRepository;	
+		this.tagRepository = tagRepository;
 		this.env = env;
 	}
 
@@ -43,27 +42,22 @@ public class DefaultConfiguration {
         return logtrace;
     }
 
-	// @Bean (name="models")
-	// public List<ModelLine> taskList(){
-	// 	List<ModelLine> models =  taskRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
-	// 	return Collections.synchronizedList(models);
-	// }
-
 	@Bean (name="queueNameMap")
 	public ConcurrentHashMap<String, String> queueNameMap(){
 		ConcurrentHashMap<String, String> queueNameMap = new ConcurrentHashMap<>();
-		List<Tag> tags = tagList();
-		tags.stream().forEach(tag->queueNameMap.put(tag.getQueueName(), tag.getNodeId()));
+		List<TagDto> tags = tagList();
+		tags.forEach(tag->queueNameMap.put(tag.getQueueName(), tag.getNodeId()));
 		return queueNameMap;
 	}
 
 	@Bean (name="tagList")
-	public List<Tag> tagList(){
-		List<Tag> tags =  tagRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
-			.stream()
-            .filter(tag -> tag.isActivated())
-			.collect(Collectors.toList());
-		return Collections.synchronizedList(getQueueNamedTag(tags));
+	public List<TagDto> tagList(){
+		// List<Tag> tags =  tagRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
+		// 	.stream()
+        //     .filter(tag -> tag.isActivated())
+		// 	.collect(Collectors.toList());
+		List<TagDto> tags = tagRepository.findNodeIdQueueNameModelLineIdByActivated();
+		return Collections.synchronizedList(tags);//getQueueNamedTag(tags));
 	}
 
 	@EventListener(ApplicationReadyEvent.class)
@@ -87,30 +81,5 @@ public class DefaultConfiguration {
 		}else{
 			return ExecutionMode.SERVER;
 		}
-	}
-
-	private List<Tag> getQueueNamedTag(List<Tag> tags){
-		tags.forEach(t -> t.setQueueName(makeQueueName(t)));
-		return tags;
-	}
-
-	private String makeQueueName(Tag tag){
-		StringBuilder sb = new StringBuilder();
-		sb.append(tag.getModelLine().getName());
-		sb.append(".");
-		sb.append(tag.getMainCategory());
-		sb.append(".");
-		sb.append(tag.getSubCategory());
-
-		if(tag.getSub2Category() != null && !tag.getSub2Category().isBlank()){
-			sb.append(".");
-			sb.append(tag.getSub2Category());
-		}
-
-		if(tag.getEtc() != null && !tag.getEtc().isBlank()){
-			sb.append(".");
-			sb.append(tag.getEtc());
-		}
-		return sb.toString();
 	}
 }

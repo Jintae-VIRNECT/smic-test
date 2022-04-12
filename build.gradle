@@ -27,11 +27,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.data:spring-data-envers'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 	// api doc
     implementation 'io.springfox:springfox-boot-starter:3.0.0'
-	
-	implementation 'org.springframework.data:spring-data-envers'
 
 	// opc ua client
 	implementation 'org.eclipse.milo:sdk-client:0.6.3'
@@ -43,12 +43,17 @@ dependencies {
 
 	// utils
 	implementation 'org.apache.commons:commons-lang3:3.12.0'
+	// http client
+	implementation 'org.eclipse.jetty:jetty-reactive-httpclient:1.1.10'
+	// json
+	implementation 'com.google.code.gson:gson'
+	//model mapper
+	implementation 'org.modelmapper:modelmapper:2.3.8'
 
 	// prometheus
 	implementation 'io.micrometer:micrometer-registry-prometheus'
 	//implementation 'junit:junit:4.13.1'
 
-	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'mysql:mysql-connector-java'
 	annotationProcessor 'org.projectlombok:lombok'
