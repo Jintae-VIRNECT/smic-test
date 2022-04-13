@@ -42,26 +42,26 @@ public class DaemonConfiguration {
 		
 	}
 
-	
 	private OpcUaClient client;
 
-	
-	//@EventListener(ApplicationReadyEvent.class)
-	public void initialize() {
-		try {
-			launchTaskExecutor();
-		} catch (Exception e) {
-			throw new ConfigurationException(e);
-		}
-	}
 
-	public void launchTaskExecutor() {
+	// public void initialize(long executionId) {
+	// 	try {
+	// 		launchTaskExecutor();
+	// 	} catch (Exception e) {
+	// 		throw new ConfigurationException(e);
+	// 	}
+	// }
+
+	//@EventListener(ApplicationReadyEvent.class)
+	public void launchTaskExecutor(long executionId) {
 		
 		try {
 			if(schedulingTaskLauncher != null){
 
 				createTopics();
 				schedulingTaskLauncher.run(client);
+				schedulingTaskLauncher.setExecutionId(executionId);
 				log.info("run scheduling task started");
 			}
 		} catch (Exception e) {
@@ -81,5 +81,10 @@ public class DaemonConfiguration {
 
 	public void stopTaskExecutor(){
 		schedulingTaskLauncher.setClient(null);
+		schedulingTaskLauncher.setExecutionId(-1l);
+	}
+
+	public long getRunningExecutionId(){
+		return  (schedulingTaskLauncher.getClient()!=null?schedulingTaskLauncher.getExecutionId():-1l);
 	}
 }

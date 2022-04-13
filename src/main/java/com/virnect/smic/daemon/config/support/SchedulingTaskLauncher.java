@@ -26,13 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 public class SchedulingTaskLauncher {
 
     private OpcUaClient client;
+	private long executionId = -1l;
 
 	@Autowired
     private ReadTasklet tasklet;
-
-	// @Autowired
-	// @Qualifier("tagList")
-    // private List<TagDto> tags;
 
     @OpcUaConnection
     public void run(OpcUaClient client) {

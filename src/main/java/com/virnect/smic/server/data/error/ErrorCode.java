@@ -9,6 +9,14 @@ public enum ErrorCode {
 	// error code for server process
 	ERR_SERVICE_PROCESS(3001, "Service Process error, Please try again or re-start the server."),
 	ERR_EXECUTION_DATA_NULL(3002, "No such execution data error"),
+	ERR_EXECUTION_DATA_DUPLICATED(3003,
+		"running execution data already exists. please stop the execution first."),
+	ERR_EXECUTION_DATA_NOT_RUNNING(3003, "No running execution data exits"),
+
+	// EXTERNAL ERR
+	ERR_EXTERNAL_ERROR_UNKNOWN(7001,"Smic responses with errors"),
+	ERR_EXTERNAL_ERROR_LOGIN_FAIL(7002,"Smic kiosk login failed"),
+	ERR_EXTERNAL_ERROR_NO_PLAN_CODE(7003,"No plan code generated from smic"),
 
 	// 공통 에러
 	ERR_INVALID_REQUEST_PARAMETER(8001, "Invalid request parameter cause api errors"),

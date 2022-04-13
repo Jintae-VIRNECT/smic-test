@@ -32,13 +32,13 @@ public class TaskService {
 
     private final TagRepository tagRepository;
     private final ReadTasklet readTasklet;
+    private final ModelMapper modelMapper;
 
 
     @OpcUaConnection
     public TagValueListResponse getTagValues(OpcUaClient client, Long taskId) {
 
 		List<Tag> tags = tagRepository.findByModelLineId(taskId);
-        ModelMapper modelMapper = new ModelMapper();
         List<TagDto> tagDtos = tags.parallelStream().map(tag->modelMapper.map(tag, TagDto.class)).collect(Collectors.toList());
 
         ConcurrentHashMap<String, String> result = readTasklet.readAndPublishAsync(client, false, null, tagDtos);

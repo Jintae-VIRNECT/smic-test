@@ -24,7 +24,10 @@ import com.virnect.smic.server.data.dto.response.ApiResponse;
 import com.virnect.smic.server.data.dto.response.SearchExecutionResponse;
 import com.virnect.smic.server.data.dto.response.StartExecutionResponse;
 import com.virnect.smic.server.data.dto.response.StopExecutionResponse;
+import com.virnect.smic.server.data.error.DuplicatedRunningExecutionException;
 import com.virnect.smic.server.data.error.ErrorCode;
+import com.virnect.smic.server.data.error.NoRunningExecutionException;
+import com.virnect.smic.server.data.error.NoSuchExecutionException;
 import com.virnect.smic.server.service.application.ExecutionService;
 
 @Slf4j
@@ -37,64 +40,88 @@ public class ExecutionRestController {
 
 	@PostMapping("start")
 	public ResponseEntity startExecution(){
+
+		ExecutionResource executionResource = new ExecutionResource();
+		WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash("start");
+		executionResource.add(selfBuilder.withSelfRel());
+
 		try {
 			Execution execution = executionService.getStartExecutionResult();
 
-			ExecutionResource executionResource = new ExecutionResource(
-				new StartExecutionResponse(execution.getId(), execution.getExecutionStatus(), execution.getCreatedDate()));
+			StartExecutionResponse startExecutionResponse =
+				new StartExecutionResponse(execution.getId(), execution.getExecutionStatus(), execution.getCreatedDate());
+			executionResource.setStartExecutionResponse(startExecutionResponse);
 
-			WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash(execution.getId());
+			executionResource.removeLinks();
+			selfBuilder = linkTo(ExecutionRestController.class).slash(execution.getId());
 			executionResource.add(selfBuilder.withSelfRel());
 			executionResource.add(selfBuilder.slash("stop").withRel("stop"));
 
 			URI createdUri = selfBuilder.toUri();
 			return ResponseEntity.created(createdUri).body(new ApiResponse<>(executionResource));
-		}catch (Exception e){
+		} catch(DuplicatedRunningExecutionException de){
+			executionResource.add(linkTo(ExecutionRestController.class).slash(de.getExecutionId()).withRel("search-current"));
+			executionResource.add(selfBuilder.slash(de.getExecutionId()).slash("stop").withRel("stop-current"));
+			return ResponseEntity.badRequest().body(new ApiResponse<>(executionResource,
+				ErrorCode.ERR_EXECUTION_DATA_DUPLICATED));
+		} catch (Exception e){
+			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-				.body(new ApiResponse<>(ErrorCode.ERR_UNEXPECTED_SERVER_ERROR));
+				.body(new ApiResponse<>(executionResource, ErrorCode.ERR_UNEXPECTED_SERVER_ERROR));
 		}
 	}
 
 	@PutMapping("{id}/stop")
 	public ResponseEntity stopExecution(@PathVariable(name = "id") Long id){
+		ExecutionResource executionResource = new ExecutionResource();
+		WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash(id).slash("stop");;
+		executionResource.add(selfBuilder.withSelfRel());
+		executionResource.add(linkTo(ExecutionRestController.class).slash("start").withRel("start"));
+
 		try {
 			Execution execution = executionService.getStopExecutionResult(id);
 
-			ExecutionResource executionResource = new ExecutionResource(
+			StopExecutionResponse stopExecutionResponse =
 				new StopExecutionResponse(execution.getId(), execution.getExecutionStatus(), execution.getCreatedDate(),
-					execution.getDestroyedDate()));
+					execution.getDestroyedDate());
+			executionResource.setStopExecutionResponse(stopExecutionResponse);
 
-			WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash(execution.getId());
+			selfBuilder = selfBuilder.slash(execution.getId());
+
+			executionResource.hasLinks();
 			executionResource.add(selfBuilder.withSelfRel());
 			executionResource.add(linkTo(ExecutionRestController.class).slash("start").withRel("start"));
 
 			return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(executionResource));
-		}catch (NoSuchElementException ne){
-
-			ExecutionResource executionResource = new ExecutionResource();
-			WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash(id).slash("stop");
-			executionResource.add(selfBuilder.withSelfRel());
-			executionResource.add(linkTo(ExecutionRestController.class).slash("start").withRel("start"));
-
+		}catch(NoRunningExecutionException nre){
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(new ApiResponse<>(executionResource, ErrorCode.ERR_EXECUTION_DATA_NOT_RUNNING));
+		}catch (NoSuchExecutionException ne){
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 				.body(new ApiResponse<>(executionResource, ErrorCode.ERR_EXECUTION_DATA_NULL));
 		}catch (Exception e){
+			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-				.body(new ApiResponse<>(ErrorCode.ERR_UNEXPECTED_SERVER_ERROR));
+				.body(new ApiResponse<>(executionResource, ErrorCode.ERR_UNEXPECTED_SERVER_ERROR));
 		}
 	}
 
 	@GetMapping("{id}")
 	public ResponseEntity searchExecution(@PathVariable(name = "id") Long id){
+
+		ExecutionResource executionResource = new ExecutionResource();
+		WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash(id);
+		executionResource.add(selfBuilder.withSelfRel());
+
 		try {
 			Execution execution = executionService.getSearchExecutionResult(id);
 
-			ExecutionResource executionResource = new ExecutionResource(
+			SearchExecutionResponse searchExecutionResponse =
 				new SearchExecutionResponse(
 					execution.getId(), execution.getExecutionStatus(), execution.getCreatedDate()
-					, execution.getUpdatedDate(), execution.getDestroyedDate()));
+					, execution.getUpdatedDate(), execution.getDestroyedDate());
+			executionResource.setSearchExecutionResponse(searchExecutionResponse);
 
-			WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash(execution.getId());
 			executionResource.add(selfBuilder.withSelfRel());
 			executionResource.add(selfBuilder.slash("stop").withRel("stop"));
 
@@ -102,16 +129,16 @@ public class ExecutionRestController {
 				.body(new ApiResponse<>(executionResource));
 		}catch (NoSuchElementException ne){
 
-			ExecutionResource executionResource = new ExecutionResource();
-			WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash(id);
-			executionResource.add(selfBuilder.withSelfRel());
+
 			executionResource.add(linkTo(ExecutionRestController.class).slash("start").withRel("start"));
+			executionResource.add(linkTo(ExecutionRestController.class).withRel("search-list"));
 
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 				.body(new ApiResponse<>(executionResource, ErrorCode.ERR_EXECUTION_DATA_NULL));
 		}catch (Exception e){
+			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-				.body(new ApiResponse<>(ErrorCode.ERR_UNEXPECTED_SERVER_ERROR));
+				.body(new ApiResponse<>(executionResource, ErrorCode.ERR_UNEXPECTED_SERVER_ERROR));
 		}
 	}
 }

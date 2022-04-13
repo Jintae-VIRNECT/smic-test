@@ -1,13 +1,12 @@
 package com.virnect.smic.server.service.application;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,33 +16,69 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import reactor.core.publisher.Mono;
 
+import com.virnect.smic.common.data.domain.Execution;
 import com.virnect.smic.common.data.domain.Order;
+import com.virnect.smic.server.data.dao.ExecutionRepository;
+import com.virnect.smic.server.data.dao.OrderRepository;
 import com.virnect.smic.server.data.dto.request.ReceivedOrderRequest;
+import com.virnect.smic.server.data.dto.request.smic.SendOrderRequest;
 import com.virnect.smic.server.data.dto.response.smic.PlanResponse;
+import com.virnect.smic.server.data.error.KioskLoginFailException;
+import com.virnect.smic.server.data.error.NoPlanCDValueException;
+import com.virnect.smic.server.data.error.NoSuchExecutionException;
 
 @Service
 public class OrderService {
 	private final Environment env;
 	private final HttpClientManager httpClientHanlder;
 	private final WebClient webClient;
+	private final ModelMapper modelMapper;
+	private final OrderRepository orderRepository;
+	private final ExecutionRepository executionRepository;
 
 	public OrderService(
-		Environment env, HttpClientManager httpClientHanlder) {
+		Environment env
+		, HttpClientManager httpClientHanlder
+		, ModelMapper modelMapper
+	    ,OrderRepository orderRepository
+		,ExecutionRepository executionRepository) {
 		this.env = env;
 		this.httpClientHanlder = httpClientHanlder;
 		this.webClient =  WebClient.builder()
 			.clientConnector(new JettyClientHttpConnector(httpClientHanlder.httpClient))
 			.baseUrl("http://"+ env.getProperty("smic.kiosk.host") + ":" + env.getProperty("smic.kiosk.port"))
 			.build();
+		this.modelMapper = modelMapper;
+		this.orderRepository = orderRepository;
+		this.executionRepository = executionRepository;
 	}
 
-	public Order createOrder(ReceivedOrderRequest receivedOrderRequest) {
+	public Order createOrder(ReceivedOrderRequest receivedOrderRequest) throws NoSuchExecutionException {
+
+		Optional<Execution> optExecution = executionRepository.findById(receivedOrderRequest.getExecution_id());
+		Execution execution = optExecution.orElseThrow(()->
+			new NoSuchExecutionException("no execution exists with id "+ receivedOrderRequest.getExecution_id()));
+
 		if(isSuccessfulLogin()){
-			String planCDValue = getPlanCDValue();
+			Optional<String> optPlanCDValue = getPlanCDValue();
+			String planCDValue = optPlanCDValue.orElseThrow(NoPlanCDValueException::new);
+
+			SendOrderRequest sendOrderRequest =  modelMapper.map(receivedOrderRequest, SendOrderRequest.class);
+			ResponseEntity<Void> response = sendOrderRequest(sendOrderRequest, planCDValue);
+
+			Order order = modelMapper.map(sendOrderRequest, Order.class);
+			order.setResponseStatus(response.getStatusCode().value());
+			order.setExecution(execution);
+
+			Order savedOrder = orderRepository.save(order);
+			return savedOrder;
+
+		} else {
+			throw new KioskLoginFailException("smic kiosk login failed");
 		}
 
-		return null;
 	}
 
 	private boolean isSuccessfulLogin() {
@@ -60,13 +95,18 @@ public class OrderService {
 				.build())
 			.retrieve()
 			.toBodilessEntity()
+			.onErrorMap(
+				throwable -> {
+					throwable.printStackTrace();
+					return throwable;
+				})
 			.block();
 
 		//System.out.println(response.toString());
 		return !response.getStatusCode().isError();
 	}
 
-	private String getPlanCDValue() {
+	private Optional<String> getPlanCDValue() {
 		String body = "{\"planCat\":\"0\"}";
 
 		PlanResponse response =  webClient.post()
@@ -75,8 +115,13 @@ public class OrderService {
 			.contentType(MediaType.APPLICATION_JSON)
 			.bodyValue(body)
 			.retrieve()
-			 .bodyToMono(PlanResponse.class)
-				 .block();
+			.bodyToMono(PlanResponse.class)
+			.onErrorMap(
+				throwable -> {
+					throwable.printStackTrace();
+					return throwable;
+				})
+			.block();
 
 		List<PlanResponse.Row> rows = response
 			.getRows()
@@ -87,8 +132,29 @@ public class OrderService {
 			.collect(Collectors.toList());
 		//System.out.println(response.toString());
 		if(rows.size()>0){
-			return String.valueOf(rows.get(0).get_0());
+			return Optional.of(String.valueOf(rows.get(0).get_0()));
 		}
-		return null;
+		return Optional.empty();
+	}
+
+	private ResponseEntity sendOrderRequest(SendOrderRequest sendOrderRequest, String planCDValue){
+		sendOrderRequest.setUserID(env.getProperty("smic.kiosk.user-id"));
+		sendOrderRequest.setPlanCDValue(planCDValue);
+
+		return webClient.post()
+			.uri(uriBuilder -> uriBuilder.path(
+					env.getProperty("smic.kiosk.order-uri"))
+				.build())
+			.accept(MediaType.APPLICATION_JSON) // application/json-compressed
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(Mono.just(sendOrderRequest), SendOrderRequest.class)
+			.retrieve()
+			.toBodilessEntity()
+			.onErrorMap(
+				throwable -> {
+					throwable.printStackTrace();
+					return throwable;
+				})
+			.block();
 	}
 }

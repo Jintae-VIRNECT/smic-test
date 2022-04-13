@@ -1,8 +1,13 @@
 package com.virnect.smic.server.data.dto.request.smic;
 
+import javax.validation.constraints.NotBlank;
+
+import lombok.Data;
+
+@Data
 public class SendOrderRequest {
 
-	private int customerAgeValue = 10;
+	private int customerAgeValue;
 	private int font;
 	private String productCDValue;
 	private String customerNameValue;
@@ -12,10 +17,11 @@ public class SendOrderRequest {
 	private String customerFirstCallValue;
 	private String customerSecondCallValue;
 	private String customerThirdCallValue;
-
 	private Boolean adv_agree;
-	private int pageNum;
+	private int pageNum = 2;
 
+	@NotBlank
 	private String userID;
+	@NotBlank
 	private String planCDValue;
 }

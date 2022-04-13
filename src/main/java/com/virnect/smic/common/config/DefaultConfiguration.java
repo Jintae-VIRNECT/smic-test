@@ -1,5 +1,6 @@
 package com.virnect.smic.common.config;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -81,5 +82,10 @@ public class DefaultConfiguration {
 		}else{
 			return ExecutionMode.SERVER;
 		}
+	}
+
+	@Bean
+	public ModelMapper modelMapper(){
+		return new ModelMapper();
 	}
 }
