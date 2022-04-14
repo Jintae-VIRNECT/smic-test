@@ -22,6 +22,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
@@ -32,6 +33,8 @@ dependencies {
 
 	// api doc
     implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.7'
+	implementation 'org.springdoc:springdoc-openapi-hateoas:1.6.7'
 
 	// opc ua client
 	implementation 'org.eclipse.milo:sdk-client:0.6.3'

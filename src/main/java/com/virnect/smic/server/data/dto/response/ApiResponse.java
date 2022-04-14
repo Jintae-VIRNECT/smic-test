@@ -2,20 +2,22 @@ package com.virnect.smic.server.data.dto.response;
 
 import com.virnect.smic.server.data.error.ErrorCode;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter @Setter
 @RequiredArgsConstructor
+@Schema(name = "api response", description = "기본 api 응답 구조")
 public class ApiResponse<T> {
-    @ApiModelProperty(value = "API 응답 데이터를 갖고 있는 객체.", dataType = "object")
+    @Schema(name="data", description = "API 응답 데이터를 갖고 있는 객체.", type = "object")
     T data;
-    ///Map<String, Object> data = new HashMap<>();
-    @ApiModelProperty(value = "API 처리 결과 상태 코드 값, 200이면 정상 처리 완료.", dataType = "int", example = "200")
+
+    @Schema(name="code", description = "API 처리 결과 상태 코드 값, 200이면 정상 처리 완료.", type = "int", example = "200")
     int code;
-    @ApiModelProperty(value = "API 처리 결과에 대한 메시지", dataType = "string", example = "success")
+
+    @Schema(name="message", description = "API 처리 결과에 대한 메시지", type = "string", example = "success")
     String message;
 
     public ApiResponse(T data) {

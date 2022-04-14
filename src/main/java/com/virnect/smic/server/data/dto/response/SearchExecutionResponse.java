@@ -14,5 +14,4 @@ public class SearchExecutionResponse {
 	private ExecutionStatus executionStatus;
 	private LocalDateTime createdDate;
 	private LocalDateTime updatedDate;
-	private LocalDateTime destroyedDate;
 }

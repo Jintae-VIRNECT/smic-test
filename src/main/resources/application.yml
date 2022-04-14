@@ -1,6 +1,6 @@
 server:
   port: 8080
-  daemon: true
+  daemon: false
     
 spring:
   application:
@@ -22,10 +22,11 @@ spring:
         use_sql_comments: false
     show-sql: true
 
-# springdoc:
-#   use-management-port: true
-#   show-actuator: true
-#   api-docs.path: /swaggerui
+springdoc:
+  use-management-port: true
+  show-actuator: true
+  api-docs.path: /swaggerui
+  packagesToScan: com.virnect.smic.server
 
 management:
   server:
@@ -33,7 +34,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, prometheus
+        include: health, info, prometheus, openapi, swaggerui
   metrics.tags.application: ${spring.application.name}
   
 logging:

@@ -14,5 +14,4 @@ public class StopExecutionResponse {
 	private Long executionId;
 	private ExecutionStatus executionStatus;
 	private LocalDateTime createdDate;
-	private LocalDateTime destroyedDate;
 }
