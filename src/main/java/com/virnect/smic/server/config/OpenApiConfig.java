@@ -73,9 +73,8 @@ public class OpenApiConfig {
 	public OpenAPI openAPI(){
 		SpringDocUtils.getConfig().addResponseTypeToIgnore(Links.class);
 
-		OpenAPI openapi = new OpenAPI()
+		return new OpenAPI()
 			.info(new Info().title(title).description("SMIC API Docs").version(version));
 
-		return openapi;
 	}
 }
