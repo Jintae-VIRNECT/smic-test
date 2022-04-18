@@ -16,14 +16,14 @@ import com.virnect.smic.server.service.api.ExecutionRestController;
 
 @Component
 @Getter @Setter
-public class ExecutionModelAssembler extends
+public class StartExecutionModelAssembler extends
 	RepresentationModelAssemblerSupport<Execution, StartExecutionResource> {
 
-	public ExecutionModelAssembler(Class<?> controllerClass, Class<StartExecutionResource> resourceType) {
+	public StartExecutionModelAssembler(Class<?> controllerClass, Class<StartExecutionResource> resourceType) {
 		super(controllerClass, resourceType);
 	}
 
-	public ExecutionModelAssembler() {
+	public StartExecutionModelAssembler() {
 		super(ExecutionRestController.class, StartExecutionResource.class);
 	}
 
@@ -44,10 +44,13 @@ public class ExecutionModelAssembler extends
 
 	public StartExecutionResource withoutModel(Exception e){
 		StartExecutionResource resource = StartExecutionResource.builder().build();
-		Link selfLink = linkTo(ExecutionRestController.class).slash("start").withSelfRel();
-		resource.add(selfLink);
+
+		resource.add(linkTo(ExecutionRestController.class).withRel("search-list"));
 
 		if(e instanceof DuplicatedRunningExecutionException){
+			resource.add(linkTo(ExecutionRestController.class)
+				.slash("current")
+				.withRel("search-current"));
 			resource.add(linkTo(ExecutionRestController.class)
 				.slash(((DuplicatedRunningExecutionException)e).getExecutionId())
 				.withRel("search"));

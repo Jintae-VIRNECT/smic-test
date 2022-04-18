@@ -22,11 +22,11 @@ spring:
         use_sql_comments: false
     show-sql: true
 
-springdoc:
-  use-management-port: true
-  show-actuator: true
-  api-docs.path: /swaggerui
-  packagesToScan: com.virnect.smic.server
+#springdoc:
+#  use-management-port: true
+#  show-actuator: true
+#  api-docs.path: /swaggerui
+#  packagesToScan: com.virnect.smic.server
 
 management:
   server:
@@ -34,7 +34,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, prometheus, openapi, swaggerui
+        include: health, info, prometheus
   metrics.tags.application: ${spring.application.name}
   
 logging:

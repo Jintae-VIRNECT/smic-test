@@ -1,19 +1,29 @@
 package com.virnect.smic.server.service.application;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import com.virnect.smic.common.util.PagingUtils;
 import com.virnect.smic.server.data.dao.ExecutionRepository;
 import com.virnect.smic.common.data.domain.Execution;
 import com.virnect.smic.common.data.domain.ExecutionStatus;
 import com.virnect.smic.daemon.config.DaemonConfiguration;
+import com.virnect.smic.server.data.dto.response.ExecutionListResponse;
+import com.virnect.smic.server.data.dto.response.PageMetadataResponse;
+import com.virnect.smic.server.data.dto.response.SearchExecutionResource;
 import com.virnect.smic.server.data.error.DuplicatedRunningExecutionException;
 import com.virnect.smic.server.data.error.NoRunningExecutionException;
 import com.virnect.smic.server.data.error.NoSuchExecutionException;
@@ -24,6 +34,7 @@ public class ExecutionService {
 
 	private final ExecutionRepository executionRepository;
 	private final DaemonConfiguration daemonConfiguration;
+	private final ModelMapper modelMapper;
 
 	@Transactional
 	public Execution getStartExecutionResult(){
@@ -63,6 +74,29 @@ public class ExecutionService {
 		Execution execution = optExecution.orElseThrow(NoSuchElementException::new);
 		return execution;
 	}
+
+
+	public Execution getCurrentExecution(){
+		Optional<Execution> optExecution = executionRepository.findFirstByOrderByCreatedDateDesc();
+		return optExecution.orElseThrow();
+	}
+
+	public ExecutionListResponse getExecutionList(Pageable pageable) {
+		Page<Execution> all = executionRepository.findAll(pageable);
+		List<SearchExecutionResource> content = all.getContent().stream()
+			.map(o->modelMapper.map(o, SearchExecutionResource.class)).collect(Collectors.toList());
+
+		PageMetadataResponse pageMeta = PagingUtils.pagingBuilder(
+			true,
+			pageable,
+			all.getNumberOfElements(),
+			all.getTotalPages(),
+			all.getTotalElements(),
+			all.isLast()
+		);
+		return new ExecutionListResponse(content, pageMeta);
+	}
+
 	@PreDestroy
 	void setExecutionStatusAbandoned(){
 		long id = daemonConfiguration.getRunningExecutionId();
@@ -72,4 +106,5 @@ public class ExecutionService {
 			executionRepository.save(o);
 		});
 	}
+
 }

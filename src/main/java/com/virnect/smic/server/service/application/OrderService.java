@@ -1,7 +1,6 @@
 package com.virnect.smic.server.service.application;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -12,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,6 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import com.virnect.smic.common.data.domain.Execution;
+import com.virnect.smic.common.data.domain.ExecutionStatus;
 import com.virnect.smic.common.data.domain.Order;
 import com.virnect.smic.server.data.dao.ExecutionRepository;
 import com.virnect.smic.server.data.dao.OrderRepository;
@@ -27,7 +28,9 @@ import com.virnect.smic.server.data.dto.request.smic.SendOrderRequest;
 import com.virnect.smic.server.data.dto.response.smic.PlanResponse;
 import com.virnect.smic.server.data.error.KioskLoginFailException;
 import com.virnect.smic.server.data.error.NoPlanCDValueException;
+import com.virnect.smic.server.data.error.NoRunningExecutionException;
 import com.virnect.smic.server.data.error.NoSuchExecutionException;
+import com.virnect.smic.server.data.error.SmicUnknownHttpException;
 
 @Service
 public class OrderService {
@@ -55,11 +58,20 @@ public class OrderService {
 		this.executionRepository = executionRepository;
 	}
 
-	public Order createOrder(ReceivedOrderRequest receivedOrderRequest) throws NoSuchExecutionException {
+	@Transactional
+	public Order createOrder(ReceivedOrderRequest receivedOrderRequest)
+		throws NoSuchExecutionException, KioskLoginFailException {
 
-		Optional<Execution> optExecution = executionRepository.findById(receivedOrderRequest.getExecution_id());
+		Optional<Execution> optExecution = executionRepository.findById(receivedOrderRequest.getExecutionId());
+
 		Execution execution = optExecution.orElseThrow(()->
-			new NoSuchExecutionException("no execution exists with id "+ receivedOrderRequest.getExecution_id()));
+			// no execution with id
+			new NoSuchExecutionException("no execution exists with id "+ receivedOrderRequest.getExecutionId()));
+
+		// execution with id exists but not started status (=> stopped/abandoned)
+		if(!execution.getExecutionStatus().equals(ExecutionStatus.STARTED)){
+			throw new NoRunningExecutionException();
+		}
 
 		if(isSuccessfulLogin()){
 			Optional<String> optPlanCDValue = getPlanCDValue();
@@ -68,12 +80,17 @@ public class OrderService {
 			SendOrderRequest sendOrderRequest =  modelMapper.map(receivedOrderRequest, SendOrderRequest.class);
 			ResponseEntity<Void> response = sendOrderRequest(sendOrderRequest, planCDValue);
 
-			Order order = modelMapper.map(sendOrderRequest, Order.class);
-			order.setResponseStatus(response.getStatusCode().value());
-			order.setExecution(execution);
+			if(!response.getStatusCode().isError()){
+				Order order = modelMapper.map(sendOrderRequest, Order.class);
+				order.setResponseStatus(response.getStatusCode().value());
+				order.setExecution(execution);
 
-			Order savedOrder = orderRepository.save(order);
-			return savedOrder;
+				Order savedOrder = orderRepository.save(order);
+				return savedOrder;
+			} else{
+				throw new SmicUnknownHttpException(response.getStatusCode()
+					, response.getStatusCode().getReasonPhrase());
+			}
 
 		} else {
 			throw new KioskLoginFailException("smic kiosk login failed");
@@ -98,7 +115,7 @@ public class OrderService {
 			.onErrorMap(
 				throwable -> {
 					throwable.printStackTrace();
-					return throwable;
+					return new KioskLoginFailException();
 				})
 			.block();
 
@@ -157,4 +174,5 @@ public class OrderService {
 				})
 			.block();
 	}
+
 }

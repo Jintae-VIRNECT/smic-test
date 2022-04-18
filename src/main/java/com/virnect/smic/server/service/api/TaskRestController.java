@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import springfox.documentation.annotations.ApiIgnore;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -29,6 +30,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/tasks")
 // @PropertySource("classpath:application.yml")
 // @ConditionalOnProperty(prefix="server",name="daemon", havingValue= "false")
+@ApiIgnore
 public class TaskRestController {
     private final TaskService taskService;
     private static final String TAG = TaskRestController.class.getSimpleName();

@@ -6,11 +6,11 @@ import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
+import io.swagger.v3.oas.annotations.links.Link;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import com.virnect.smic.common.data.domain.ExecutionStatus;
@@ -20,13 +20,6 @@ import com.virnect.smic.common.data.domain.ExecutionStatus;
 @AllArgsConstructor
 @Schema(name="executionResource", description = "작업 응답 리소스")
 public class StartExecutionResource extends RepresentationModel<StartExecutionResource> {
-	//@JsonUnwrapped
-	//@Schema(name="StartExecutionResponse", description = "작업 시작 응답 객체")
-	//private StartExecutionResponse startExecutionResponse;
-
-	//public StartExecutionResource(StartExecutionResponse startExecutionResponse){
-	//	this.startExecutionResponse = startExecutionResponse;
-	//}
 
 	@Schema(name="execution id", description = "작업 id")
 	private Long executionId;
