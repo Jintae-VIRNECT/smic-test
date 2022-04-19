@@ -125,7 +125,8 @@ public class ExecutionRestController {
 		}
 	}
 
-	@GetMapping(value = "search/{id}", produces = "application/hal+json")
+	//@GetMapping(value = "search/{id}", produces = "application/hal+json")
+	@GetMapping(value = "{id:^[0-9]*$}", produces = "application/hal+json")
 	@Operation(summary = "작업 조회", description = "id에 해당하는 작업 정보를 조회합니다.")
 	public ResponseEntity<ApiResponse<SearchExecutionResource>> getExecution(@PathVariable(name = "id", required = true) Long id) {
 
@@ -156,22 +157,22 @@ public class ExecutionRestController {
 		}
 	}
 
-	@GetMapping(value = "/", produces = "application/hal+json")
-	@ApiIgnore
-	@Operation(summary = "작업 목록 조회", description = "작업 목록 정보를 조회합니다.", hidden = true)
-	public ResponseEntity<ApiResponse<ExecutionListResponse>> getExecutionList(
-		@Parameter(required = false) Pageable pageable) {
-		ExecutionListResponse executionList = executionService.getExecutionList(pageable);
-		HttpHeaders headers = new HttpHeaders();
-		List<MediaType> mediaTypes = new ArrayList<>();
-		mediaTypes.add(MediaType.APPLICATION_JSON);
-		headers.setAccept(mediaTypes);
-
-		return ResponseEntity.status(HttpStatus.OK)
-			.headers(headers)
-			.body(new ApiResponse<ExecutionListResponse>(executionList));
-
-	}
+	// @GetMapping(value = "/", produces = "application/hal+json")
+	// @ApiIgnore
+	// @Operation(summary = "작업 목록 조회", description = "작업 목록 정보를 조회합니다.", hidden = true)
+	// public ResponseEntity<ApiResponse<ExecutionListResponse>> getExecutionList(
+	// 	@Parameter(required = false) Pageable pageable) {
+	// 	ExecutionListResponse executionList = executionService.getExecutionList(pageable);
+	// 	HttpHeaders headers = new HttpHeaders();
+	// 	List<MediaType> mediaTypes = new ArrayList<>();
+	// 	mediaTypes.add(MediaType.APPLICATION_JSON);
+	// 	headers.setAccept(mediaTypes);
+	//
+	// 	return ResponseEntity.status(HttpStatus.OK)
+	// 		.headers(headers)
+	// 		.body(new ApiResponse<ExecutionListResponse>(executionList));
+	//
+	// }
 
 	@GetMapping(value="/latest", produces = "application/hal+json")
 	@Operation(summary = "최근 작업 조회", description = "가장 최근의 작업 정보를 조회합니다.", responses={

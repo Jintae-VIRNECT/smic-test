@@ -1,6 +1,7 @@
 package com.virnect.smic.server.config;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.classmate.TypeResolver;
@@ -10,33 +11,34 @@ import com.virnect.smic.server.data.error.ErrorCode;
 import com.virnect.smic.server.data.error.ErrorResponseMessage;
 
 import org.eclipse.milo.opcua.stack.core.channel.messages.ErrorMessage;
-import org.springdoc.core.SpringDocUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.hateoas.HypermediaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.validation.Errors;
+
 
 import lombok.RequiredArgsConstructor;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.builders.ResponseBuilder;
+import springfox.documentation.oas.annotations.EnableOpenApi;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.service.Response;
+import springfox.documentation.service.Server;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
-
+@EnableOpenApi
 @Configuration
 @RequiredArgsConstructor
 public class OpenApiConfig {
 
     private final TypeResolver typeResolver;
 	private final ObjectMapper objectMapper;
+	private final Environment env;
 
     String title = "VIRNECT SMIC API Document.";
     String version = "v1.0";
@@ -62,6 +64,10 @@ public class OpenApiConfig {
 
 	@Bean
 	public Docket api() {
+		String serverUrl = env.getProperty("server.host") + ":" + env.getProperty("server.port");
+		Server server = new Server("smic-api-server", serverUrl, "smic-api-server"
+			, Collections.emptyList(), Collections.emptyList());
+
 
 		return new Docket(DocumentationType.OAS_30)
 			.ignoredParameterTypes(Errors.class)
@@ -70,7 +76,8 @@ public class OpenApiConfig {
 			.globalResponses(HttpMethod.POST, globalResponseMessage())
 			.globalResponses(HttpMethod.PUT, globalResponseMessage())
 			.globalResponses(HttpMethod.DELETE, globalResponseMessage())
-			//.host("localhost:" + serverPort)
+			.servers(server)
+			//.host(env.getProperty("server.localhost") + ":" + env.getProperty("server.port"))
 			.select()
 			.apis(RequestHandlerSelectors.basePackage("com.virnect.smic.server"))
 			.paths(PathSelectors.any())

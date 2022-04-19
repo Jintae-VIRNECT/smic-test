@@ -47,7 +47,7 @@ public class SearchExecutionModelAssembler extends
 
 		if(e instanceof NoRunningExecutionException){
 			resource.add(linkTo(ExecutionRestController.class).slash("latest").withRel("search-latest"));
-			resource.add(linkTo(ExecutionRestController.class).slash("search/"+ executionId).withRel("search"));
+			resource.add(linkTo(ExecutionRestController.class).slash( executionId).withRel("search"));
 		} else if(e instanceof NoSuchExecutionException){
 			resource.add(linkTo(ExecutionRestController.class).slash("latest").withRel("search-latest"));
 		}

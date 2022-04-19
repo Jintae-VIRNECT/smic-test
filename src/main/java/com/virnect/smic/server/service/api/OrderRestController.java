@@ -42,7 +42,7 @@ public class OrderRestController {
 	private final OrderService orderService;
 	private final OrderModelAssembler assembler;
 
-	@PostMapping
+	@PostMapping(produces = "application/hal+json")
 	@Operation(summary = "주문 요청", description = "주문 생성을 요청합니다.")
 	public ResponseEntity<ApiResponse<OrderResource>> createOrder(@RequestBody @Valid ReceivedOrderRequest orderRequest
 		, Errors errors){

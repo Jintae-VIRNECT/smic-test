@@ -52,7 +52,7 @@ public class StartExecutionModelAssembler extends
 				.slash("latest")
 				.withRel("search-latest"));
 			resource.add(linkTo(ExecutionRestController.class)
-				.slash("search/"+ ((DuplicatedRunningExecutionException)e).getExecutionId())
+				.slash(((DuplicatedRunningExecutionException)e).getExecutionId())
 				.withRel("search"));
 			resource.add(linkTo(ExecutionRestController.class)
 				.slash(((DuplicatedRunningExecutionException)e).getExecutionId()).slash("stop")
