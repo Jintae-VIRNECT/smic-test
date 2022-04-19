@@ -51,10 +51,10 @@ public class OrderModelAssembler extends
 		OrderResource resource = OrderResource.builder().build();
 
 		if(e instanceof NoSuchExecutionException){
-			resource.add(linkTo(ExecutionRestController.class).withRel("search-list"));
-			resource.add(linkTo(ExecutionRestController.class).slash("current").withRel("search-current"));
+			//resource.add(linkTo(ExecutionRestController.class).withRel("search-list"));
+			resource.add(linkTo(ExecutionRestController.class).slash("latest").withRel("search-latest"));
 		} else if (e instanceof NoRunningExecutionException) {
-			resource.add(linkTo(ExecutionRestController.class).withRel("search-list"));
+			//resource.add(linkTo(ExecutionRestController.class).withRel("search-list"));
 			resource.add(linkTo(ExecutionRestController.class).slash("start").withRel("start"));
 		}
 

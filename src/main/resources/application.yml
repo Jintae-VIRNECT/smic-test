@@ -1,6 +1,6 @@
 server:
   port: 8080
-  daemon: false
+  daemon: true
     
 spring:
   application:
@@ -21,6 +21,8 @@ spring:
         format_sql: true
         use_sql_comments: false
     show-sql: true
+  hateoas:
+    use-hal-as-default-json-media-type: false
 
 #springdoc:
 #  use-management-port: true

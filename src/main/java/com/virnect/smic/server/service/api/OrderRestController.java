@@ -68,7 +68,7 @@ public class OrderRestController {
 		} catch (NoRunningExecutionException nree) {
 			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ApiResponse<OrderResource>(
 				assembler.withoutModel(nree),
-				ErrorCode.ERR_EXECUTION_DATA_NULL
+				ErrorCode.ERR_EXECUTION_DATA_NOT_RUNNING
 			));
 		} catch (NoPlanCDValueException npce) {
 			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ApiResponse<OrderResource>(

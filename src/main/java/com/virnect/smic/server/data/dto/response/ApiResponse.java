@@ -1,5 +1,15 @@
 package com.virnect.smic.server.data.dto.response;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.core.EmbeddedWrapper;
+import org.springframework.hateoas.server.core.EmbeddedWrappers;
+
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+
 import com.virnect.smic.server.data.error.ErrorCode;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,6 +21,7 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @Schema(name = "api response", description = "기본 api 응답 구조")
 public class ApiResponse<T> {
+
     @Schema(name="data", description = "API 응답 데이터를 갖고 있는 객체.", type = "object")
     T data;
 
@@ -76,4 +87,5 @@ public class ApiResponse<T> {
         this.message = errorCode.getMessage();
         this.data = null;
     }
+
 }

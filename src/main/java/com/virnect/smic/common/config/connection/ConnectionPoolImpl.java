@@ -56,7 +56,7 @@ public class ConnectionPoolImpl implements ConnectionPool, InitializingBean {
         usedConnection = new LinkedBlockingDeque<>(initialPoolSize);
         
         for (int i = 0; i < initialPoolSize; i++) {
-            //connectionPool.add(Optional.ofNullable(createConnection()));
+            connectionPool.add(Optional.ofNullable(createConnection()));
         }
 
         log.info("static pool created");

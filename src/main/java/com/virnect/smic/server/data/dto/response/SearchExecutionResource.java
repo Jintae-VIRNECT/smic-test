@@ -18,7 +18,7 @@ import com.virnect.smic.common.data.domain.ExecutionStatus;
 @Getter @Setter
 @Builder
 @AllArgsConstructor
-//@Schema(name="searchExecutionResource", description = "기본 작업 응답 리소스")
+@Schema(name="searchExecutionResource", description = "기본 작업 응답 리소스")
 public class SearchExecutionResource extends RepresentationModel<SearchExecutionResource> {
 
 	@Schema(name="execution id", description = "작업 id")

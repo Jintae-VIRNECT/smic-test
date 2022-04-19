@@ -45,14 +45,14 @@ public class StartExecutionModelAssembler extends
 	public StartExecutionResource withoutModel(Exception e){
 		StartExecutionResource resource = StartExecutionResource.builder().build();
 
-		resource.add(linkTo(ExecutionRestController.class).withRel("search-list"));
+		//resource.add(linkTo(ExecutionRestController.class).withRel("search-list"));
 
 		if(e instanceof DuplicatedRunningExecutionException){
 			resource.add(linkTo(ExecutionRestController.class)
-				.slash("current")
-				.withRel("search-current"));
+				.slash("latest")
+				.withRel("search-latest"));
 			resource.add(linkTo(ExecutionRestController.class)
-				.slash(((DuplicatedRunningExecutionException)e).getExecutionId())
+				.slash("search/"+ ((DuplicatedRunningExecutionException)e).getExecutionId())
 				.withRel("search"));
 			resource.add(linkTo(ExecutionRestController.class)
 				.slash(((DuplicatedRunningExecutionException)e).getExecutionId()).slash("stop")

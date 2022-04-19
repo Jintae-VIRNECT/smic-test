@@ -12,6 +12,8 @@ import com.virnect.smic.server.data.error.ErrorResponseMessage;
 import org.eclipse.milo.opcua.stack.core.channel.messages.ErrorMessage;
 import org.springdoc.core.SpringDocUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.hateoas.HypermediaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Schema
+@Schema(name="page")
 public class PageMetadataResponse {
     @Schema(description = "Page number currently viewed", example = "0")
     private int currentPage;

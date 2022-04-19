@@ -3,12 +3,13 @@ package com.virnect.smic.server.service.api;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,17 +18,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.links.Link;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import springfox.documentation.annotations.ApiIgnore;
 
 import com.virnect.smic.common.data.domain.Execution;
 import com.virnect.smic.server.data.dto.response.ExecutionListResponse;
@@ -53,16 +52,16 @@ public class ExecutionRestController {
 	private final StartExecutionModelAssembler startAssembler;
 	private final SearchExecutionModelAssembler searchAssembler;
 
-	@PostMapping("start")
-	@Operation(summary = "작업 시작", description = "smic 데이터 연동을 시작합니다." //)
-	, responses = {
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "ok"
-			, content = @Content(mediaType = "application/json")
+	@PostMapping(value = "start", produces = "application/hal+json")
+	@Operation(summary = "작업 시작", description = "smic 데이터 연동을 시작합니다.")
+	// , responses = {
+	// 	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "ok"
+	// 		, content = @Content(mediaType = "application/json")
 			//, links = {
 			//@Link(name = "blabla", operationRef = "20202020")
 		//}
-		)
-	})
+	// 	)
+	// })
 	public ResponseEntity<ApiResponse<StartExecutionResource>> startExecution() {
 
 		try {
@@ -91,7 +90,7 @@ public class ExecutionRestController {
 		}
 	}
 
-	@PutMapping("{id}/stop")
+	@PutMapping(value="{id}/stop", produces = "application/hal+json")
 	@Operation(summary = "작업 종료", description = "smic 데이터 연동을 종료합니다.")
 	public ResponseEntity<ApiResponse<SearchExecutionResource>> stopExecution(
 		@Parameter(name="execution id", description="작업 id", required = true) @PathVariable(name = "id") Long id) {
@@ -126,9 +125,9 @@ public class ExecutionRestController {
 		}
 	}
 
-	@GetMapping("{id}")
+	@GetMapping(value = "search/{id}", produces = "application/hal+json")
 	@Operation(summary = "작업 조회", description = "id에 해당하는 작업 정보를 조회합니다.")
-	public ResponseEntity<ApiResponse<SearchExecutionResource>> getExecution(@PathVariable(name = "id") Long id) {
+	public ResponseEntity<ApiResponse<SearchExecutionResource>> getExecution(@PathVariable(name = "id", required = true) Long id) {
 
 		try {
 			Execution execution = executionService.getSearchExecutionResult(id);
@@ -157,21 +156,32 @@ public class ExecutionRestController {
 		}
 	}
 
-	@GetMapping("/")
-	@Operation(summary = "작업 목록 조회", description = "작업 목록 정보를 조회합니다.")
+	@GetMapping(value = "/", produces = "application/hal+json")
+	@ApiIgnore
+	@Operation(summary = "작업 목록 조회", description = "작업 목록 정보를 조회합니다.", hidden = true)
 	public ResponseEntity<ApiResponse<ExecutionListResponse>> getExecutionList(
 		@Parameter(required = false) Pageable pageable) {
 		ExecutionListResponse executionList = executionService.getExecutionList(pageable);
+		HttpHeaders headers = new HttpHeaders();
+		List<MediaType> mediaTypes = new ArrayList<>();
+		mediaTypes.add(MediaType.APPLICATION_JSON);
+		headers.setAccept(mediaTypes);
 
-		return ResponseEntity.ok(new ApiResponse<ExecutionListResponse>(executionList));
+		return ResponseEntity.status(HttpStatus.OK)
+			.headers(headers)
+			.body(new ApiResponse<ExecutionListResponse>(executionList));
 
 	}
 
-	@GetMapping("/current")
-	@Operation(summary = "최근 작업 조회", description = "가장 최근의 작업 정보를 조회합니다.")
+	@GetMapping(value="/latest", produces = "application/hal+json")
+	@Operation(summary = "최근 작업 조회", description = "가장 최근의 작업 정보를 조회합니다.", responses={
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(content = @Content(mediaType = "application/json"))
+	})
 	public ResponseEntity<ApiResponse<SearchExecutionResource>> getCurrentExecution() {
 		Execution execution = executionService.getCurrentExecution();
 		SearchExecutionResource searchExecutionResource = searchAssembler.toModel(execution);
+
+
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(new ApiResponse<SearchExecutionResource>(searchExecutionResource));
 	}

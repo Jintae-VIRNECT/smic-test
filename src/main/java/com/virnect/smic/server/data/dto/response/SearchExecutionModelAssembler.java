@@ -3,6 +3,7 @@ package com.virnect.smic.server.data.dto.response;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 
@@ -42,14 +43,21 @@ public class SearchExecutionModelAssembler extends
 	public SearchExecutionResource withoutModel(long executionId, Exception e){
 		SearchExecutionResource resource = SearchExecutionResource.builder().build();
 
-		resource.add(linkTo(ExecutionRestController.class).withRel("search-list"));
+		//resource.add(linkTo(ExecutionRestController.class).withRel("search-list"));
 
 		if(e instanceof NoRunningExecutionException){
-			resource.add(linkTo(ExecutionRestController.class).slash("current").withRel("search-current"));
-			resource.add(linkTo(ExecutionRestController.class).slash(executionId).withRel("search"));
+			resource.add(linkTo(ExecutionRestController.class).slash("latest").withRel("search-latest"));
+			resource.add(linkTo(ExecutionRestController.class).slash("search/"+ executionId).withRel("search"));
 		} else if(e instanceof NoSuchExecutionException){
-			resource.add(linkTo(ExecutionRestController.class).slash("current").withRel("search-current"));
+			resource.add(linkTo(ExecutionRestController.class).slash("latest").withRel("search-latest"));
 		}
 		return resource;
+	}
+
+	@Override
+	public CollectionModel<SearchExecutionResource> toCollectionModel(
+		Iterable<? extends Execution> entities
+	) {
+		return super.toCollectionModel(entities);
 	}
 }
