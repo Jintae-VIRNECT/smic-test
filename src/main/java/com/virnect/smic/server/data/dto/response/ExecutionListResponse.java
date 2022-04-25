@@ -17,9 +17,7 @@ public class ExecutionListResponse extends RepresentationModel {
 	@Schema(name="executions", description = "list of executions")
 	private final List<SearchExecutionResource> executions;
 
-
 	@Schema(name="page", description = "page meta data")
 	private final PageMetadataResponse page;
-
 
 }

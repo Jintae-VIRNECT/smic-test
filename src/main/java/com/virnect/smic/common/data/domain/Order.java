@@ -1,6 +1,6 @@
 package com.virnect.smic.common.data.domain;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,8 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import org.springframework.data.annotation.CreatedDate;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -53,9 +53,9 @@ public class Order {
 	@Column(name = "plan_cd_value")
 	private String planCDValue;
 
-	@Column(name = "created_at", nullable = false)
-	@CreatedDate
-	private LocalDateTime createdDate;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "created_at",insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	private Date createdDate;
 
 	@Column(name="response_status")
 	private int responseStatus;

@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import springfox.documentation.annotations.ApiIgnore;
 
 import com.virnect.smic.common.data.domain.Execution;
+import com.virnect.smic.server.data.dto.response.ApiCustomResponse;
 import com.virnect.smic.server.data.dto.response.ExecutionListResponse;
 import com.virnect.smic.server.data.dto.response.SearchExecutionModelAssembler;
 import com.virnect.smic.server.data.dto.response.StartExecutionModelAssembler;
@@ -93,7 +94,7 @@ public class ExecutionRestController {
 	@PutMapping(value="{id}/stop", produces = "application/hal+json")
 	@Operation(summary = "작업 종료", description = "smic 데이터 연동을 종료합니다.")
 	public ResponseEntity<ApiResponse<SearchExecutionResource>> stopExecution(
-		@Parameter(name="execution id", description="작업 id", required = true) @PathVariable(name = "id") Long id) {
+		@Parameter(name="id", description="작업 id", required = true) @PathVariable(name = "id") Long id) {
 
 		try {
 			Execution execution = executionService.getStopExecutionResult(id);
@@ -158,8 +159,7 @@ public class ExecutionRestController {
 	}
 
 	// @GetMapping(value = "/", produces = "application/hal+json")
-	// @ApiIgnore
-	// @Operation(summary = "작업 목록 조회", description = "작업 목록 정보를 조회합니다.", hidden = true)
+	// @Operation(summary = "작업 목록 조회", description = "작업 목록 정보를 조회합니다.")
 	// public ResponseEntity<ApiResponse<ExecutionListResponse>> getExecutionList(
 	// 	@Parameter(required = false) Pageable pageable) {
 	// 	ExecutionListResponse executionList = executionService.getExecutionList(pageable);
@@ -186,4 +186,22 @@ public class ExecutionRestController {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(new ApiResponse<SearchExecutionResource>(searchExecutionResource));
 	}
+
+	// @GetMapping(value = "/", produces = "application/hal+json")
+	// @ApiIgnore
+	// @Operation(summary = "작업 목록 조회", description = "작업 목록 정보를 조회합니다.", hidden = true)
+	// public ResponseEntity<ApiCustomResponse> getExecutionList(
+	// 	@Parameter(required = false) Pageable pageable) {
+	// 	ExecutionListResponse executionList = executionService.getExecutionList(pageable);
+	//
+	// 	HttpHeaders headers = new HttpHeaders();
+	// 	List<MediaType> mediaTypes = new ArrayList<>();
+	// 	mediaTypes.add(MediaType.APPLICATION_JSON);
+	// 	headers.setAccept(mediaTypes);
+	//
+	// 	return ResponseEntity.status(HttpStatus.OK)
+	// 		.headers(headers)
+	// 		.body(new ApiCustomResponse(executionList));
+	//
+	// }
 }

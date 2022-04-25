@@ -16,25 +16,24 @@ public class PlanResponse {
 	@Data
 	public static class Row {
 		/*
-		"_0": 19884,
-		"_1": "SMIC 현장주문",
-		"_2": 1648738800000,
-		"_3": 0,
-		"_4": "1",
-		"_5": "0",
-		"_6": 1648799663891,
-		"_7": 1648799663891,
-		"_10": "1"
+	  "plan_cd": 19914,
+      "plan_name": "SMIC_현장주문",
+      "plan_date": 1650466800000,
+      "add_count": 0,
+      "auto_operation": "1",
+      "plan_cat": "0",
+      "ins_date": 1650499718200,
+      "upt_date": 1650499718200,
+      "plan_progress": "1"
 		* */
-		private int _0;
-		private String _1;
-		private long _2;
-		private int _3;
-		private String _4;
-		private long _6;
-		private long _7;
-		private Object _8;
-		private Object _9;
-		private String _10;
+		private int plan_cd;
+		private String plan_name;
+		private long plan_date;
+		private int add_count;
+		private String auto_operation;
+		private String plan_cat;
+		private long ins_date;
+		private long upt_date;
+		private String plan_progress;
 	}
 }

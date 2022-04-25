@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.http.HttpField;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -35,12 +36,12 @@ public class HttpClientManager {
 				.append("Method: ")
 				.append(request.getMethod()));
 
-		//        inboundRequest.onRequestHeaders(request -> {
-		//            sbRequest.append("\nHeaders:\n");
-		//            for (HttpField header : request.getHeaders()) {
-		//                sbRequest.append("\t\t" + header.getName() + " : " + header.getValue() + "\n");
-		//            }
-		//        });
+		       inboundRequest.onRequestHeaders(request -> {
+		           sbRequest.append("\nHeaders:\n");
+		           for (HttpField header : request.getHeaders()) {
+		               sbRequest.append("\t\t" + header.getName() + " : " + header.getValue() + "\n");
+		           }
+		       });
 
 		inboundRequest.onRequestContent((request, content) -> {
 			String bufferAsString = StandardCharsets.UTF_8.decode(content).toString();
@@ -53,12 +54,12 @@ public class HttpClientManager {
 				.append(response.getStatus())
 				.append("\n"));
 
-		//        inboundRequest.onResponseHeaders(response -> {
-		//            sbResponse.append("Headers:\n");
-		//            for (HttpField header : response.getHeaders()) {
-		//                sbResponse.append("\t\t" + header.getName() + " : " + header.getValue() + "\n");
-		//            }
-		//        });
+		       inboundRequest.onResponseHeaders(response -> {
+		           sbResponse.append("Headers:\n");
+		           for (HttpField header : response.getHeaders()) {
+		               sbResponse.append("\t\t" + header.getName() + " : " + header.getValue() + "\n");
+		           }
+		       });
 
 		inboundRequest.onResponseContent(((response, content) -> {
 			String bufferAsString = StandardCharsets.UTF_8.decode(content).toString();

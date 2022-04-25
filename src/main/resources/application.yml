@@ -1,7 +1,7 @@
 server:
   port: 8080
   daemon: true
-  host: 192.168.0.241
+  #host: 192.168.0.241
     
 spring:
   application:
@@ -24,6 +24,10 @@ spring:
     show-sql: true
   hateoas:
     use-hal-as-default-json-media-type: false
+  boot:
+    admin:
+      client:
+        url: http://localhost:8070
 
 #springdoc:
 #  use-management-port: true
@@ -37,7 +41,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, prometheus, env
+        include: "*"
   metrics.tags.application: ${spring.application.name}
   
 logging:

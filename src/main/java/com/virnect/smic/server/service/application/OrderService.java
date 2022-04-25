@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import com.virnect.smic.server.data.error.KioskLoginFailException;
 import com.virnect.smic.server.data.error.NoPlanCDValueException;
 import com.virnect.smic.server.data.error.NoRunningExecutionException;
 import com.virnect.smic.server.data.error.NoSuchExecutionException;
+import com.virnect.smic.server.data.error.NoSuchOrderException;
 import com.virnect.smic.server.data.error.SmicUnknownHttpException;
 
 @Service
@@ -80,7 +82,9 @@ public class OrderService {
 			SendOrderRequest sendOrderRequest =  modelMapper.map(receivedOrderRequest, SendOrderRequest.class);
 			ResponseEntity<Void> response = sendOrderRequest(sendOrderRequest, planCDValue);
 
-			if(!response.getStatusCode().isError()){
+			if(response.getStatusCode().value()==10000||response.getStatusCode().value()==200){
+				modelMapper.getConfiguration()
+					.setMatchingStrategy(MatchingStrategies.STRICT);
 				Order order = modelMapper.map(sendOrderRequest, Order.class);
 				order.setResponseStatus(response.getStatusCode().value());
 				order.setExecution(execution);
@@ -127,7 +131,7 @@ public class OrderService {
 		String body = "{\"planCat\":\"0\"}";
 
 		PlanResponse response =  webClient.post()
-			.uri(env.getProperty("smic.kiosk.plan-uri"))
+			.uri(uriBuilder -> uriBuilder.path(env.getProperty("smic.kiosk.plan-uri")).build())
 			.accept(MediaType.APPLICATION_JSON) // application/json-compressed
 			.contentType(MediaType.APPLICATION_JSON)
 			.bodyValue(body)
@@ -143,13 +147,13 @@ public class OrderService {
 		List<PlanResponse.Row> rows = response
 			.getRows()
 			.stream()
-			.filter(row -> row.get_1().equals("SMIC 현장주문")
-				|| row.get_1().equals("SMIC현장주문")
-				|| row.get_1().equals("SMIC_현장주문"))
+			.filter(row -> row.getPlan_name().equals("SMIC 현장주문")
+				|| row.getPlan_name().equals("SMIC현장주문")
+				|| row.getPlan_name().equals("SMIC_현장주문"))
 			.collect(Collectors.toList());
 		//System.out.println(response.toString());
 		if(rows.size()>0){
-			return Optional.of(String.valueOf(rows.get(0).get_0()));
+			return Optional.of(String.valueOf(rows.get(0).getPlan_cd()));
 		}
 		return Optional.empty();
 	}
@@ -161,8 +165,9 @@ public class OrderService {
 		return webClient.post()
 			.uri(uriBuilder -> uriBuilder.path(
 					env.getProperty("smic.kiosk.order-uri"))
+				//.queryParam("Accept", "application/json-compressed")
 				.build())
-			.accept(MediaType.APPLICATION_JSON) // application/json-compressed
+			.accept(MediaType.parseMediaType("application/json-compressed"))//MediaType.APPLICATION_JSON) // application/json-compressed
 			.contentType(MediaType.APPLICATION_JSON)
 			.body(Mono.just(sendOrderRequest), SendOrderRequest.class)
 			.retrieve()
@@ -175,4 +180,9 @@ public class OrderService {
 			.block();
 	}
 
+	public Order getOrder(Long id) {
+
+		Optional<Order> order = orderRepository.findById(id);
+		return order.orElseThrow(NoSuchOrderException::new);
+	}
 }

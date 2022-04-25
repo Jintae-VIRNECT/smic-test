@@ -9,6 +9,8 @@ import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +31,7 @@ import com.virnect.smic.server.data.error.KioskLoginFailException;
 import com.virnect.smic.server.data.error.NoPlanCDValueException;
 import com.virnect.smic.server.data.error.NoRunningExecutionException;
 import com.virnect.smic.server.data.error.NoSuchExecutionException;
+import com.virnect.smic.server.data.error.NoSuchOrderException;
 import com.virnect.smic.server.data.error.SmicUnknownHttpException;
 import com.virnect.smic.server.service.application.OrderService;
 
@@ -92,5 +95,26 @@ public class OrderRestController {
 					assembler.withoutModel(e),
 					ErrorCode.ERR_UNEXPECTED_SERVER_ERROR));
 		}
+	}
+	@GetMapping(value = "{id:^[0-9]*$}", produces = "application/hal+json")
+	@Operation(summary = "주문 조회", description = "id에 해당하는 주문 정보를 조회합니다.")
+	public ResponseEntity<ApiResponse<OrderResource>> getOrder(@PathVariable(name = "id", required = true) Long id){
+
+		try {
+			Order order = orderService.getOrder(id);
+			return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<OrderResource>(assembler.toModel(order)));
+		}catch(NoSuchOrderException nse){
+			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ApiResponse<OrderResource>(
+				assembler.withoutModel(nse),
+				ErrorCode.ERR_ORDER_DATA_NULL
+			));
+		}catch (Exception e){
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+				.body(new ApiResponse<OrderResource>(
+					assembler.withoutModel(e),
+					ErrorCode.ERR_UNEXPECTED_SERVER_ERROR));
+		}
+
 	}
 }

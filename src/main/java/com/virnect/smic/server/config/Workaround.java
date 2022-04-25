@@ -14,7 +14,7 @@ import springfox.documentation.oas.web.OpenApiTransformationContext;
 import springfox.documentation.oas.web.WebMvcOpenApiTransformationFilter;
 import springfox.documentation.spi.DocumentationType;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 public class Workaround implements WebMvcOpenApiTransformationFilter {
 

@@ -64,9 +64,9 @@ public class OpenApiConfig {
 
 	@Bean
 	public Docket api() {
-		String serverUrl = env.getProperty("server.host") + ":" + env.getProperty("server.port");
-		Server server = new Server("smic-api-server", serverUrl, "smic-api-server"
-			, Collections.emptyList(), Collections.emptyList());
+		// String serverUrl = env.getProperty("server.host") + ":" + env.getProperty("server.port");
+		//  Server server = new Server("smic-api-server", serverUrl, "smic-api-server"
+		//  	, Collections.emptyList(), Collections.emptyList());
 
 
 		return new Docket(DocumentationType.OAS_30)
@@ -76,8 +76,8 @@ public class OpenApiConfig {
 			.globalResponses(HttpMethod.POST, globalResponseMessage())
 			.globalResponses(HttpMethod.PUT, globalResponseMessage())
 			.globalResponses(HttpMethod.DELETE, globalResponseMessage())
-			.servers(server)
-			//.host(env.getProperty("server.localhost") + ":" + env.getProperty("server.port"))
+			//.servers(server)
+			//.host(serverUrl)
 			.select()
 			.apis(RequestHandlerSelectors.basePackage("com.virnect.smic.server"))
 			.paths(PathSelectors.any())

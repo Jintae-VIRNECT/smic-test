@@ -17,7 +17,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
 		+ "COALESCE(concat('.', t.sub2_category), ''), "
 		+ "COALESCE(concat('.', t.etc), '' ) "
 		+ ") as queueName "
-		+ "from Tag as t, Model_line as m "
+		+ "from tag as t, model_line as m "
 		+ "where t.activated = 1 "
 		+ "and t.model_line_id = m.model_line_id";
 	@Query(value =sql, nativeQuery = true)

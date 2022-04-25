@@ -12,6 +12,7 @@ public enum ErrorCode {
 	ERR_EXECUTION_DATA_DUPLICATED(3003,
 		"running execution data already exists. please stop the execution first."),
 	ERR_EXECUTION_DATA_NOT_RUNNING(3003, "No running execution data exits"),
+	ERR_ORDER_DATA_NULL(3102, "No such order data error"),
 
 	// EXTERNAL ERR
 	ERR_EXTERNAL_ERROR_UNKNOWN(7001,"Smic responses with errors"),
