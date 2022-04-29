@@ -29,6 +29,8 @@
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>30MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
+            <totalSizeCap>20GB</totalSizeCap>
+            <maxHistory>2</maxHistory>
         </rollingPolicy>
 
     </appender>
@@ -51,6 +53,8 @@
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>50MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
+            <totalSizeCap>30GB</totalSizeCap>
+            <maxHistory>2</maxHistory>
         </rollingPolicy>
 
     </appender>
@@ -74,6 +78,8 @@
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>50MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
+            <totalSizeCap>20GB</totalSizeCap>
+            <maxHistory>2</maxHistory>
         </rollingPolicy>
 
     </appender>

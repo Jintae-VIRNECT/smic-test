@@ -64,6 +64,7 @@ public class DefaultConfiguration {
 	@EventListener(ApplicationReadyEvent.class)
 	public void initialize() {
 		try {
+			jobLauncher.presetExecutionStatus();
 			jobLauncher.run(getExecutionMode());
 			//launchTaskExecutor(jobExecution);
 		} catch (Exception e) {

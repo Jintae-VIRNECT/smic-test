@@ -55,7 +55,7 @@ public class OrderModelAssembler extends
 			resource.add(linkTo(ExecutionRestController.class).slash("latest").withRel("search-latest"));
 		} else if (e instanceof NoRunningExecutionException) {
 			//resource.add(linkTo(ExecutionRestController.class).withRel("search-list"));
-			resource.add(linkTo(ExecutionRestController.class).slash("start").withRel("start"));
+			//resource.add(linkTo(ExecutionRestController.class).withRel("start"));
 		}
 
 		return resource;

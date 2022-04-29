@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,7 +54,7 @@ public class ExecutionRestController {
 	private final StartExecutionModelAssembler startAssembler;
 	private final SearchExecutionModelAssembler searchAssembler;
 
-	@PostMapping(value = "start", produces = "application/hal+json")
+	@PostMapping(produces = "application/hal+json")
 	@Operation(summary = "작업 시작", description = "smic 데이터 연동을 시작합니다.")
 	// , responses = {
 	// 	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "ok"
@@ -91,7 +92,7 @@ public class ExecutionRestController {
 		}
 	}
 
-	@PutMapping(value="{id}/stop", produces = "application/hal+json")
+	@DeleteMapping(value="{id:^[0-9]*$}", produces = "application/hal+json")
 	@Operation(summary = "작업 종료", description = "smic 데이터 연동을 종료합니다.")
 	public ResponseEntity<ApiResponse<SearchExecutionResource>> stopExecution(
 		@Parameter(name="id", description="작업 id", required = true) @PathVariable(name = "id") Long id) {
@@ -103,7 +104,7 @@ public class ExecutionRestController {
 
 			// add links
 			searchExecutionResource.add(linkTo(ExecutionRestController.class).slash(id).withSelfRel());
-			searchExecutionResource.add(linkTo(ExecutionRestController.class).slash("start").withRel("start"));
+			searchExecutionResource.add(linkTo(ExecutionRestController.class).withRel("start"));
 
 			return ResponseEntity.status(HttpStatus.OK)
 				.body(new ApiResponse<SearchExecutionResource>(searchExecutionResource));
@@ -139,7 +140,7 @@ public class ExecutionRestController {
 			// add link
 			WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash(id);
 			executionResource.add(selfBuilder.withSelfRel());
-			executionResource.add(selfBuilder.slash("stop").withRel("stop"));
+			//executionResource.add(selfBuilder.withRel("stop"));
 
 			return ResponseEntity.status(HttpStatus.OK)
 				.body(new ApiResponse<SearchExecutionResource>(executionResource));

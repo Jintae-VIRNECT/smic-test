@@ -36,9 +36,9 @@ public class StartExecutionModelAssembler extends
 			.build();
 		Link selfLink = linkTo(ExecutionRestController.class).slash(resource.getExecutionId()).withSelfRel();
 		resource.add(selfLink);
-		resource.add(linkTo(ExecutionRestController.class)
-			.slash(resource.getExecutionId()).slash("stop")
-			.withRel("stop"));
+		// resource.add(linkTo(ExecutionRestController.class)
+		// 	.slash(resource.getExecutionId()).slash("stop")
+		// 	.withRel("stop"));
 		return resource;
 	}
 
@@ -54,9 +54,9 @@ public class StartExecutionModelAssembler extends
 			resource.add(linkTo(ExecutionRestController.class)
 				.slash(((DuplicatedRunningExecutionException)e).getExecutionId())
 				.withRel("search"));
-			resource.add(linkTo(ExecutionRestController.class)
-				.slash(((DuplicatedRunningExecutionException)e).getExecutionId()).slash("stop")
-				.withRel("stop"));
+			// resource.add(linkTo(ExecutionRestController.class)
+			// 	.slash(((DuplicatedRunningExecutionException)e).getExecutionId())
+			// 	.withRel("stop"));
 		}
 		return resource;
 	}
