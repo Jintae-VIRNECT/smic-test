@@ -12,11 +12,12 @@ pipeline {
     stages {
         stage ('Build') {
             steps {
-                if (isUnix()) {
-                    sh './gradlew clean build'
-                } else {
-                    bat 'gradlew.bat clean build'
-                }
+//                 if (isUnix()) {
+//                     sh './gradlew clean build'
+//                 } else {
+//                     bat 'gradlew.bat clean build'
+//                 }
+                echo 'fff'
             }
         }
 
