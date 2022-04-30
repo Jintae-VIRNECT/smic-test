@@ -1,7 +1,7 @@
 pipeline{
     agent any
     tools {
-
+        gradlew 'gradlew'
     }
 
     stages {
