@@ -1,2 +1,2 @@
-# smic
+# smic-app
 
