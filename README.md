@@ -1,2 +1,2 @@
-# smic-application
+# smic-application(common, server, daemon)
 
