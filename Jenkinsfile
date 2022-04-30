@@ -1,7 +1,12 @@
 pipeline {
     agent any
+
+    triggers {
+        pollSCM('H/5 * * * *')
+    }
+
     tools {
-        gradle 'gradle7.4'
+        gradle 'gradle'
     }
 
     stages {
