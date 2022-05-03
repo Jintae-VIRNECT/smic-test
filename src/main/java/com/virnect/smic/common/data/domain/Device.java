@@ -16,42 +16,38 @@ import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
 @Getter @Setter
-@AllArgsConstructor
-public class Execution extends  BaseTimeEntity {
+@Entity
+@NoArgsConstructor
+public class Device extends BaseTimeEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "execution_id")
+	@Column(name = "device_id")
 	private Long id;
 
 	@Enumerated(EnumType.STRING)
 	private ExecutionStatus executionStatus;
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "execution")
-	private List<Order> orders;
+	@ManyToOne
+	@JoinColumn(name = "execution_id")
+	private Execution execution;
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "execution")
-	private List<Device> devices;
+	@ManyToOne
+	@JoinColumn(name = "supply_order_id")
+	private Order order;
 
-	public Execution() {
-		executionStatus = ExecutionStatus.STARTED;
+	private String macAddress;
+
+	public Device(String macAddress, Long id){
+		this.macAddress = macAddress;
+		this.id = id;
+		this.executionStatus = ExecutionStatus.STARTED;
 	}
 
-	@Override
-	public String toString() {
-		return "Execution{" +
-			"id=" + id +
-			", executionStatus=" + executionStatus +
-			", orders=" + orders +
-			", devices=" + devices +
-			'}';
-	}
 }

@@ -25,8 +25,21 @@ public class StartExecutionResource extends RepresentationModel<StartExecutionRe
 	private Long executionId;
 	@Schema(name="execution status", description = "작업 상태", example = "STARTED")
 	private ExecutionStatus executionStatus;
-	@Schema(name="execution created date", description = "작업 생성일시", example = "2022-04-12 16:11:36")
-	private LocalDateTime createdDate;
+	@Schema(name="execution created date", description = "작업 생성 일시", example = "2022-04-12 16:11:36")
+	private LocalDateTime executionCreatedDate;
+	@Schema(name="execution updated date", description = "작업 갱신 일시", example = "2022-04-12 17:11:36")
+	private LocalDateTime executionUpdatedDate;
+
+	@Schema(name="device id", description = "장비(홀로렌즈) id")
+	private Long deviceId;
+	@Schema(name="device created date", description = "장비 생성 일시", example = "2022-04-12 11:11:36")
+	private LocalDateTime deviceCreatedDate;
+	@Schema(name="device updated date", description = "장비 갱신 일시", example = "2022-04-12 12:11:36")
+	private LocalDateTime deviceUpdatedDate;
+	@Schema(name="device status", description = "장비 상태", example = "STARTED")
+	private ExecutionStatus deviceStatus;
+	@Schema(name="mac address", description = "장비 MAC ADDRESS")
+	private String macAddress;
 
 	public StartExecutionResource(){
 		super();

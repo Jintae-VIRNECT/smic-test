@@ -3,13 +3,9 @@ package com.virnect.smic.server.service.api;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,21 +13,18 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
+import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import springfox.documentation.annotations.ApiIgnore;
 
 import com.virnect.smic.common.data.domain.Execution;
-import com.virnect.smic.server.data.dto.response.ApiCustomResponse;
-import com.virnect.smic.server.data.dto.response.ExecutionListResponse;
 import com.virnect.smic.server.data.dto.response.SearchExecutionModelAssembler;
 import com.virnect.smic.server.data.dto.response.StartExecutionModelAssembler;
 import com.virnect.smic.server.data.dto.response.SearchExecutionResource;
@@ -56,24 +49,19 @@ public class ExecutionRestController {
 
 	@PostMapping(produces = "application/hal+json")
 	@Operation(summary = "작업 시작", description = "smic 데이터 연동을 시작합니다.")
-	// , responses = {
-	// 	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "ok"
-	// 		, content = @Content(mediaType = "application/json")
-			//, links = {
-			//@Link(name = "blabla", operationRef = "20202020")
-		//}
-	// 	)
-	// })
-	public ResponseEntity<ApiResponse<StartExecutionResource>> startExecution() {
+	//@ApiParam(name="macAddress", description = "장비(홀로렌즈) MAC ADDRESS")
+	public ResponseEntity<ApiResponse<StartExecutionResource>>
+		startExecution(@Parameter(name="macAddress", description = "장비(홀로렌즈) MAC ADDRESS")
+			@RequestParam(name="macAddress") String macAddress) {
 
 		try {
-			Execution execution = executionService.getStartExecutionResult();
+			StartExecutionResource execution = executionService.getStartExecutionResult(macAddress);
 
-			WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash(execution.getId());
+			WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash(execution.getExecutionId());
 			URI createdUri = selfBuilder.toUri();
 			return ResponseEntity.created(createdUri)
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(new ApiResponse<StartExecutionResource>(startAssembler.toModel(execution)));
+				.body(new ApiResponse<StartExecutionResource>(startAssembler.withModel(execution)));
 
 		 } catch (DuplicatedRunningExecutionException de) {
 			return ResponseEntity.badRequest()
@@ -130,7 +118,8 @@ public class ExecutionRestController {
 	//@GetMapping(value = "search/{id}", produces = "application/hal+json")
 	@GetMapping(value = "{id:^[0-9]*$}", produces = "application/hal+json")
 	@Operation(summary = "작업 조회", description = "id에 해당하는 작업 정보를 조회합니다.")
-	public ResponseEntity<ApiResponse<SearchExecutionResource>> getExecution(@PathVariable(name = "id", required = true) Long id) {
+	public ResponseEntity<ApiResponse<SearchExecutionResource>>
+		getExecution(@PathVariable(name = "id", required = true) Long id) {
 
 		try {
 			Execution execution = executionService.getSearchExecutionResult(id);
