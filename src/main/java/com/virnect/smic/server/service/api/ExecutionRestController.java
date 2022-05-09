@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,8 +27,9 @@ import com.virnect.smic.common.data.domain.Execution;
 import com.virnect.smic.server.data.dto.response.SearchExecutionModelAssembler;
 import com.virnect.smic.server.data.dto.response.StartExecutionModelAssembler;
 import com.virnect.smic.server.data.dto.response.SearchExecutionResource;
-import com.virnect.smic.server.data.dto.response.StartExecutionResource;
+import com.virnect.smic.server.data.dto.response.ExecutionResource;
 import com.virnect.smic.server.data.dto.response.ApiResponse;
+import com.virnect.smic.server.data.dto.response.StopExecutionModelAssembler;
 import com.virnect.smic.server.data.error.DuplicatedRunningExecutionException;
 import com.virnect.smic.server.data.error.ErrorCode;
 import com.virnect.smic.server.data.error.NoRunningExecutionException;
@@ -40,33 +40,32 @@ import com.virnect.smic.server.service.application.ExecutionService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/executions")
-//@Tag(name="execution", description="작업 시작/종료/조회 API")
 public class ExecutionRestController {
 
 	private final ExecutionService executionService;
 	private final StartExecutionModelAssembler startAssembler;
 	private final SearchExecutionModelAssembler searchAssembler;
+	private final StopExecutionModelAssembler stopAssembler;
 
 	@PostMapping(produces = "application/hal+json")
 	@Operation(summary = "작업 시작", description = "smic 데이터 연동을 시작합니다.")
-	//@ApiParam(name="macAddress", description = "장비(홀로렌즈) MAC ADDRESS")
-	public ResponseEntity<ApiResponse<StartExecutionResource>>
+	public ResponseEntity<ApiResponse<ExecutionResource>>
 		startExecution(@Parameter(name="macAddress", description = "장비(홀로렌즈) MAC ADDRESS")
 			@RequestParam(name="macAddress") String macAddress) {
 
 		try {
-			StartExecutionResource execution = executionService.getStartExecutionResult(macAddress);
+			ExecutionResource execution = executionService.getStartExecutionResult(macAddress);
 
 			WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash(execution.getExecutionId());
 			URI createdUri = selfBuilder.toUri();
 			return ResponseEntity.created(createdUri)
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(new ApiResponse<StartExecutionResource>(startAssembler.withModel(execution)));
+				.body(new ApiResponse<ExecutionResource>(startAssembler.withModel(execution)));
 
 		 } catch (DuplicatedRunningExecutionException de) {
 			return ResponseEntity.badRequest()
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(new ApiResponse<StartExecutionResource>(
+				.body(new ApiResponse<ExecutionResource>(
 					startAssembler.withoutModel(de),
 				ErrorCode.ERR_EXECUTION_DATA_DUPLICATED
 			));
@@ -74,7 +73,7 @@ public class ExecutionRestController {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(new ApiResponse<StartExecutionResource>(
+				.body(new ApiResponse<ExecutionResource>(
 					startAssembler.withoutModel(e)
 					, ErrorCode.ERR_UNEXPECTED_SERVER_ERROR));
 		}
@@ -82,40 +81,38 @@ public class ExecutionRestController {
 
 	@DeleteMapping(value="{id:^[0-9]*$}", produces = "application/hal+json")
 	@Operation(summary = "작업 종료", description = "smic 데이터 연동을 종료합니다.")
-	public ResponseEntity<ApiResponse<SearchExecutionResource>> stopExecution(
-		@Parameter(name="id", description="작업 id", required = true) @PathVariable(name = "id") Long id) {
+	public ResponseEntity<ApiResponse<ExecutionResource>> stopExecution(
+		@Parameter(name="id", description="작업 id", required = true)
+		@PathVariable(name = "id") Long id
+		, @Parameter(name="macAddress", description = "장비(홀로렌즈) MAC ADDRESS")
+		@RequestParam(name="macAddress") String macAddress) {
 
 		try {
-			Execution execution = executionService.getStopExecutionResult(id);
+			ExecutionResource execution = executionService.getStopExecutionResult(id, macAddress);
 
-			SearchExecutionResource searchExecutionResource = searchAssembler.toModel(execution);
-
-			// add links
-			searchExecutionResource.add(linkTo(ExecutionRestController.class).slash(id).withSelfRel());
-			searchExecutionResource.add(linkTo(ExecutionRestController.class).withRel("start"));
+			ExecutionResource executionResource = stopAssembler.withModel(execution);
 
 			return ResponseEntity.status(HttpStatus.OK)
-				.body(new ApiResponse<SearchExecutionResource>(searchExecutionResource));
+				.body(new ApiResponse<ExecutionResource>(executionResource));
 		} catch (NoRunningExecutionException nre) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(new ApiResponse<SearchExecutionResource>(
-					searchAssembler.withoutModel(id, nre)
+				.body(new ApiResponse<ExecutionResource>(
+					stopAssembler.withoutModel(id, nre)
 					, ErrorCode.ERR_EXECUTION_DATA_NOT_RUNNING));
 		} catch (NoSuchExecutionException ne) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(new ApiResponse<SearchExecutionResource>(
-					searchAssembler.withoutModel(id, ne)
+				.body(new ApiResponse<ExecutionResource>(
+					stopAssembler.withoutModel(id, ne)
 					, ErrorCode.ERR_EXECUTION_DATA_NULL));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-				.body(new ApiResponse<SearchExecutionResource>(
-					searchAssembler.withoutModel(id, e)
+				.body(new ApiResponse<ExecutionResource>(
+					stopAssembler.withoutModel(id, e)
 					, ErrorCode.ERR_UNEXPECTED_SERVER_ERROR));
 		}
 	}
 
-	//@GetMapping(value = "search/{id}", produces = "application/hal+json")
 	@GetMapping(value = "{id:^[0-9]*$}", produces = "application/hal+json")
 	@Operation(summary = "작업 조회", description = "id에 해당하는 작업 정보를 조회합니다.")
 	public ResponseEntity<ApiResponse<SearchExecutionResource>>

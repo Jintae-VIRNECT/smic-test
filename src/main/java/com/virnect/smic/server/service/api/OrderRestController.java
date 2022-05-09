@@ -25,7 +25,6 @@ import com.virnect.smic.server.data.dto.request.ReceivedOrderRequest;
 import com.virnect.smic.server.data.dto.response.ApiResponse;
 import com.virnect.smic.server.data.dto.response.OrderModelAssembler;
 import com.virnect.smic.server.data.dto.response.OrderResource;
-import com.virnect.smic.server.data.dto.response.StartExecutionResource;
 import com.virnect.smic.server.data.error.ErrorCode;
 import com.virnect.smic.server.data.error.KioskLoginFailException;
 import com.virnect.smic.server.data.error.NoPlanCDValueException;

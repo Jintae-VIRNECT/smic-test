@@ -55,7 +55,7 @@ smic:
     # port: 8932
     pool-size: 3
     host: 222.98.122.50
-    port: 4850
+    port: 4860 #4850
   kiosk:
     user-id: kiosk1
     password: kiosk1234567890
@@ -65,6 +65,7 @@ smic:
     login-uri: Thingworx/action-login
     plan-uri: Thingworx/Things/EF.OrderMashupQuery.TH/Services/SelectPlanNameToday
     order-uri: Thingworx/Things/EF.OrderMashupManagement.TH/Services/InsertOrder
+    alert-summary-uri: Thingworx/Resources/PTC.Factory.AlertMonitorUtilities/Services/GetAlertSummary
 
 mq: 
   queue-manager: rabbitmq
@@ -76,4 +77,7 @@ mq:
   rabbitmq:
     enabled: true
     host: 127.0.0.1
+    #host: 211.50.11.85
     port: 5672
+    management-port: 15672
+    channel-uri: api/channels

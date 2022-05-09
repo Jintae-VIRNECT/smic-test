@@ -3,14 +3,11 @@ package com.virnect.smic.server.data.dto.response;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import com.virnect.smic.common.data.domain.Execution;
 import com.virnect.smic.server.data.error.DuplicatedRunningExecutionException;
 import com.virnect.smic.server.service.api.DeviceRestController;
 import com.virnect.smic.server.service.api.ExecutionRestController;
@@ -19,8 +16,8 @@ import com.virnect.smic.server.service.api.ExecutionRestController;
 @Getter @Setter
 public class StartExecutionModelAssembler {
 
-	public StartExecutionResource withModel(StartExecutionResource param){
-		StartExecutionResource resource = param;
+	public ExecutionResource withModel(ExecutionResource param){
+		ExecutionResource resource = param;
 		resource.add(linkTo(ExecutionRestController.class)
 			.withRel("execution"));
 		resource.add(linkTo(DeviceRestController.class)
@@ -28,8 +25,8 @@ public class StartExecutionModelAssembler {
 		return resource;
 	}
 
-	public StartExecutionResource withoutModel(Exception e){
-		StartExecutionResource resource = StartExecutionResource.builder().build();
+	public ExecutionResource withoutModel(Exception e){
+		ExecutionResource resource = ExecutionResource.builder().build();
 
 		//resource.add(linkTo(ExecutionRestController.class).withRel("search-list"));
 

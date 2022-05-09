@@ -1,4 +1,4 @@
-package com.virnect.smic.server.service.application;
+package com.virnect.smic.daemon.http;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class HttpClientManager {
 
-	protected final HttpClient httpClient = new HttpClient() {
+	public final HttpClient httpClient = new HttpClient() {
 		@Override
 		public Request newRequest(URI uri) {
 			Request request = super.newRequest(uri);

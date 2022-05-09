@@ -51,7 +51,9 @@ class ExecutionServiceTest {
 		Execution executionStopped = new Execution();
 		executionStopped.setId(2l);
 		List<Device> devices = new ArrayList<>();
-		Device device = new Device("hahaha", 1l);
+		Execution execution = new Execution();
+		execution.setId(1l);
+		Device device = new Device("hahaha", execution);
 		devices.add(device);
 		executionStopped.setDevices(devices);
 		executionStopped.setExecutionStatus(ExecutionStatus.STOPPED);
@@ -78,7 +80,9 @@ class ExecutionServiceTest {
 
 	@Test
 	void registerDevice(){
-		Device device = new Device("fkfkfk",2l);
+		Execution execution = new Execution();
+		execution.setId(2l);
+		Device device = new Device("fkfkfk",execution);
 		when(deviceRepository.findByExecutionIdAndMacAddress( anyLong(),anyString()))
 			.thenReturn(Optional.of(device));
 		Execution exec = new Execution();

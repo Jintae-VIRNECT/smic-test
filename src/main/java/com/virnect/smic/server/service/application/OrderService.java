@@ -19,9 +19,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
 
+import com.virnect.smic.common.data.domain.Device;
 import com.virnect.smic.common.data.domain.Execution;
 import com.virnect.smic.common.data.domain.ExecutionStatus;
 import com.virnect.smic.common.data.domain.Order;
+import com.virnect.smic.daemon.http.HttpClientManager;
+import com.virnect.smic.server.data.dao.DeviceRepository;
 import com.virnect.smic.server.data.dao.ExecutionRepository;
 import com.virnect.smic.server.data.dao.OrderRepository;
 import com.virnect.smic.server.data.dto.request.ReceivedOrderRequest;
@@ -30,6 +33,7 @@ import com.virnect.smic.server.data.dto.response.smic.PlanResponse;
 import com.virnect.smic.server.data.error.KioskLoginFailException;
 import com.virnect.smic.server.data.error.NoPlanCDValueException;
 import com.virnect.smic.server.data.error.NoRunningExecutionException;
+import com.virnect.smic.server.data.error.NoSuchDeviceException;
 import com.virnect.smic.server.data.error.NoSuchExecutionException;
 import com.virnect.smic.server.data.error.NoSuchOrderException;
 import com.virnect.smic.server.data.error.SmicUnknownHttpException;
@@ -42,13 +46,15 @@ public class OrderService {
 	private final ModelMapper modelMapper;
 	private final OrderRepository orderRepository;
 	private final ExecutionRepository executionRepository;
+	private final DeviceRepository deviceRepository;
 
 	public OrderService(
 		Environment env
 		, HttpClientManager httpClientHanlder
 		, ModelMapper modelMapper
-	    ,OrderRepository orderRepository
-		,ExecutionRepository executionRepository) {
+	    , OrderRepository orderRepository
+		, ExecutionRepository executionRepository
+		, DeviceRepository deviceRepository) {
 		this.env = env;
 		this.httpClientHanlder = httpClientHanlder;
 		this.webClient =  WebClient.builder()
@@ -58,6 +64,7 @@ public class OrderService {
 		this.modelMapper = modelMapper;
 		this.orderRepository = orderRepository;
 		this.executionRepository = executionRepository;
+		this.deviceRepository = deviceRepository;
 	}
 
 	@Transactional
@@ -75,6 +82,10 @@ public class OrderService {
 			throw new NoRunningExecutionException();
 		}
 
+		Device device = deviceRepository.findByIdAndExecutionId(
+			receivedOrderRequest.getDeviceId(), receivedOrderRequest.getExecutionId())
+			.orElseThrow(NoSuchDeviceException::new);
+
 		if(isSuccessfulLogin()){
 			Optional<String> optPlanCDValue = getPlanCDValue();
 			String planCDValue = optPlanCDValue.orElseThrow(NoPlanCDValueException::new);
@@ -88,7 +99,7 @@ public class OrderService {
 				Order order = modelMapper.map(sendOrderRequest, Order.class);
 				order.setResponseStatus(response.getStatusCode().value());
 				order.setExecution(execution);
-
+				order.setDevice(device);
 				Order savedOrder = orderRepository.save(order);
 				return savedOrder;
 			} else{

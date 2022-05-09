@@ -4,9 +4,6 @@ import java.time.LocalDateTime;
 
 import org.springframework.hateoas.RepresentationModel;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-
-import io.swagger.v3.oas.annotations.links.Link;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +16,7 @@ import com.virnect.smic.common.data.domain.ExecutionStatus;
 @Builder
 @AllArgsConstructor
 @Schema(name="executionResource", description = "작업 응답 리소스")
-public class StartExecutionResource extends RepresentationModel<StartExecutionResource> {
+public class ExecutionResource extends RepresentationModel<ExecutionResource> {
 
 	@Schema(name="execution id", description = "작업 id")
 	private Long executionId;
@@ -41,7 +38,7 @@ public class StartExecutionResource extends RepresentationModel<StartExecutionRe
 	@Schema(name="mac address", description = "장비 MAC ADDRESS")
 	private String macAddress;
 
-	public StartExecutionResource(){
+	public ExecutionResource(){
 		super();
 	}
 }

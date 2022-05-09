@@ -66,7 +66,8 @@ public class Order {
 	@JoinColumn(name = "execution_id")
 	private Execution execution;
 
-	@OneToMany(mappedBy = "order")
-	private List<Device> device;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="device_id")
+	private Device device;
 
 }

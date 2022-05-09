@@ -6,7 +6,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -38,15 +37,14 @@ public class Device extends BaseTimeEntity{
 	private Execution execution;
 
 	@JsonIgnore
-	@ManyToOne
-	@JoinColumn(name = "supply_order_id")
-	private Order order;
+	@OneToMany(mappedBy = "device")
+	private List<Order> orders;
 
 	private String macAddress;
 
-	public Device(String macAddress, Long id){
+	public Device(String macAddress, Execution execution){
 		this.macAddress = macAddress;
-		this.id = id;
+		this.execution = execution;
 		this.executionStatus = ExecutionStatus.STARTED;
 	}
 

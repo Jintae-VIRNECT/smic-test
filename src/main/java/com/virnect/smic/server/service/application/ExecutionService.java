@@ -3,7 +3,6 @@ package com.virnect.smic.server.service.application;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
@@ -27,9 +26,10 @@ import com.virnect.smic.daemon.config.DaemonConfiguration;
 import com.virnect.smic.server.data.dto.response.ExecutionListResponse;
 import com.virnect.smic.server.data.dto.response.PageMetadataResponse;
 import com.virnect.smic.server.data.dto.response.SearchExecutionResource;
-import com.virnect.smic.server.data.dto.response.StartExecutionResource;
+import com.virnect.smic.server.data.dto.response.ExecutionResource;
 import com.virnect.smic.server.data.error.DuplicatedRunningExecutionException;
 import com.virnect.smic.server.data.error.NoRunningExecutionException;
+import com.virnect.smic.server.data.error.NoSuchDeviceException;
 import com.virnect.smic.server.data.error.NoSuchExecutionException;
 
 @Slf4j
@@ -43,7 +43,7 @@ public class ExecutionService {
 	private final ModelMapper modelMapper;
 
 	@Transactional
-	public StartExecutionResource getStartExecutionResult(String macAddress){
+	public ExecutionResource getStartExecutionResult(String macAddress){
 
 		Optional<Execution> optExec = executionRepository.findFirstByOrderByCreatedDateDesc();
 
@@ -53,7 +53,7 @@ public class ExecutionService {
 
 			daemonConfiguration.launchTaskExecutor(execution.getId());
 
-			return createStartExecutionResource(execution, device);
+			return createExecutionResource(execution, device);
 		}
 		// 이미 execution이 존재하지만 STARTED 상태인 경우
 		else{
@@ -63,8 +63,8 @@ public class ExecutionService {
 		}
 	}
 
-	private StartExecutionResource createStartExecutionResource(Execution execution, Device device) {
-		return StartExecutionResource.builder()
+	private ExecutionResource createExecutionResource(Execution execution, Device device) {
+		return ExecutionResource.builder()
 			.executionId(execution.getId())
 			.executionStatus(execution.getExecutionStatus())
 			.executionCreatedDate(execution.getCreatedDate())
@@ -88,12 +88,16 @@ public class ExecutionService {
 		}else{
 			log.info("getStartExecutionResult.registerDevice: device-{} is registered with execution-{}"
 				, macAddress, execution.getId());
-			return deviceRepository.save(new Device(macAddress, execution.getId()));
+			return deviceRepository.save(new Device(macAddress, execution));
 		}
 	}
 
 	@Transactional
-	public Execution getStopExecutionResult(long id) {
+	public ExecutionResource getStopExecutionResult(long id, String macAddress) {
+		Optional<Device> optDevice = deviceRepository.findByExecutionIdAndMacAddress(id, macAddress);
+		Device device = optDevice.orElseThrow(NoSuchDeviceException::new);
+		device.setExecutionStatus(ExecutionStatus.STOPPED);
+		deviceRepository.save(device);
 
 		Optional<Execution> optExecution = executionRepository.findFirstByOrderByCreatedDateDesc();
 		Execution execution = optExecution.orElseThrow(NoSuchExecutionException::new);
@@ -102,11 +106,15 @@ public class ExecutionService {
 		} else if (!execution.getId().equals(id)) {
 			throw new NoSuchExecutionException();
 		}
-		execution.setExecutionStatus(ExecutionStatus.STOPPED);
 
-		daemonConfiguration.stopTaskExecutor();
-
-		return executionRepository.save(execution);
+		List<Device> runningDevices = deviceRepository.findByExecutionIdAndExecutionStatus(id, ExecutionStatus.STARTED);
+		if(runningDevices.size()==0){
+			execution.setExecutionStatus(ExecutionStatus.STOPPED);
+			daemonConfiguration.stopTaskExecutor();
+			return createExecutionResource(executionRepository.save(execution), device);
+		}else{
+			return createExecutionResource(execution, device);
+		}
 	}
 
 	public Execution getSearchExecutionResult(long id){

@@ -19,6 +19,10 @@ public class ReceivedOrderRequest {
 	@Schema(name="executionId", required = true, description = "현재 진행 중인 작업 id", example="1", type="long")
 	private long executionId;
 
+	@NotNull
+	@Schema(name="deviceId", required = true, description = "요청 장비 id", example="1", type="long")
+	private long deviceId;
+
 	@Size(min=1, max=20)
 	@Schema(name="customerNameValue", required = true, description = "고객 이름", example="홍길동", type="string"
 		, maxLength = 20)
