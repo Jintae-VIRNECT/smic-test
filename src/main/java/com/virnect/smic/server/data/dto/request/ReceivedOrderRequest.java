@@ -81,4 +81,23 @@ public class ReceivedOrderRequest {
 		, type="int", defaultValue = "2")
 	private int pageNum = 2;
 
+	@Override
+	public String toString() {
+		return "ReceivedOrderRequest{" +
+			"executionId=" + executionId +
+			", deviceId=" + deviceId +
+			", customerNameValue='" + customerNameValue + '\'' +
+			", customerAgeValue=" + customerAgeValue +
+			", font=" + font +
+			", productCDValue='" + productCDValue + '\'' +
+			", customerGenderValue='" + customerGenderValue + '\'' +
+			", customerGroupValue='" + customerGroupValue + '\'' +
+			", customerMailValue='" + customerMailValue + '\'' +
+			", customerFirstCallValue='" + customerFirstCallValue + '\'' +
+			", customerSecondCallValue='" + customerSecondCallValue + '\'' +
+			", customerThirdCallValue='" + customerThirdCallValue + '\'' +
+			", adv_agree=" + adv_agree +
+			", pageNum=" + pageNum +
+			'}';
+	}
 }

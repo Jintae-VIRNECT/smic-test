@@ -84,11 +84,11 @@ public class ExecutionRestController {
 	public ResponseEntity<ApiResponse<ExecutionResource>> stopExecution(
 		@Parameter(name="id", description="작업 id", required = true)
 		@PathVariable(name = "id") Long id
-		, @Parameter(name="macAddress", description = "장비(홀로렌즈) MAC ADDRESS")
-		@RequestParam(name="macAddress") String macAddress) {
+		, @Parameter(name="deviceId", description = "장비(홀로렌즈) id")
+		@RequestParam(name="deviceId") long deviceId) {
 
 		try {
-			ExecutionResource execution = executionService.getStopExecutionResult(id, macAddress);
+			ExecutionResource execution = executionService.getStopExecutionResult(id, deviceId);
 
 			ExecutionResource executionResource = stopAssembler.withModel(execution);
 

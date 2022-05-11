@@ -21,14 +21,16 @@ public class AlertRestController {
 
 	@GetMapping("/summary")
 	@Operation(summary = "알림 메세지 요약 조회", description = "알림 메세지 요약(alert message summary) 정보를 조회합니다.")
-	public ResponseEntity<ApiResponse> getSummary(){
+	public ResponseEntity<String> getSummary(){
 		try {
 			String data = alertService.getSummary();
 			return ResponseEntity.status(HttpStatus.OK)
-				.body(new ApiResponse<String>(data));
+				.body(data);
+				//.body(new ApiResponse<String>(data));
 		}catch(Exception e){
 			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-				.body(new ApiResponse<String>(e.getMessage()));
+				.body(e.getMessage());
+				//.body(new ApiResponse<String>(e.getMessage()));
 		}
 	}
 }

@@ -49,6 +49,8 @@ public class OrderRestController {
 	public ResponseEntity<ApiResponse<OrderResource>> createOrder(@RequestBody @Valid ReceivedOrderRequest orderRequest
 		, Errors errors){
 
+		log.info("createOrder [request]: "+ orderRequest.toString());
+
 		if(errors.hasErrors()){
 			OrderResource resource = new OrderResource();
 			resource.setErrors(errors.getAllErrors());

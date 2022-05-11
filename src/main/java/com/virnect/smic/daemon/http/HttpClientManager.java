@@ -66,8 +66,8 @@ public class HttpClientManager {
 			sbResponse.append("Response Body:\n\t" + bufferAsString);
 		}));
 
-		inboundRequest.onRequestSuccess(request -> log.info(sbRequest.toString()));
-		inboundRequest.onResponseSuccess(response -> log.info(sbResponse.toString()));
+		inboundRequest.onRequestSuccess(request -> log.debug(sbRequest.toString()));
+		inboundRequest.onResponseSuccess(response -> log.debug(sbResponse.toString()));
 
 		return inboundRequest;
 	}

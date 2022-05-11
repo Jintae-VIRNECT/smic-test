@@ -28,6 +28,7 @@ import com.virnect.smic.server.data.dto.response.PageMetadataResponse;
 import com.virnect.smic.server.data.dto.response.SearchExecutionResource;
 import com.virnect.smic.server.data.dto.response.ExecutionResource;
 import com.virnect.smic.server.data.error.DuplicatedRunningExecutionException;
+import com.virnect.smic.server.data.error.NoRunningDeviceException;
 import com.virnect.smic.server.data.error.NoRunningExecutionException;
 import com.virnect.smic.server.data.error.NoSuchDeviceException;
 import com.virnect.smic.server.data.error.NoSuchExecutionException;
@@ -42,25 +43,49 @@ public class ExecutionService {
 	private final DaemonConfiguration daemonConfiguration;
 	private final ModelMapper modelMapper;
 
-	@Transactional
+
 	public ExecutionResource getStartExecutionResult(String macAddress){
 
-		Optional<Execution> optExec = executionRepository.findFirstByOrderByCreatedDateDesc();
+		Optional<Execution> optionalExecution = getLatestExecutionInfo();
 
-		if(!optExec.isPresent() || !optExec.get().getExecutionStatus().equals(ExecutionStatus.STARTED)){
-			Execution execution = executionRepository.save(new Execution());
+		if(checkLatestExecutionStatusNotStarted(optionalExecution)){
+			Execution execution = registerExecution();
 			Device device = registerDevice(macAddress, execution);
 
-			daemonConfiguration.launchTaskExecutor(execution.getId());
+			startDaemon(execution.getId());
 
 			return createExecutionResource(execution, device);
 		}
 		// 이미 execution이 존재하지만 STARTED 상태인 경우
 		else{
-			DuplicatedRunningExecutionException duplicatedException =
-				new DuplicatedRunningExecutionException(daemonConfiguration.getRunningExecutionId());
-			throw duplicatedException;
+			Execution execution = optionalExecution.get();
+			if(getRunningDeviceInfo(execution, macAddress).isPresent()){
+				throw new DuplicatedRunningExecutionException(execution.getId());
+			}else{
+				Device device = registerDevice(macAddress, execution);
+				return createExecutionResource(execution, device);
+			}
+
 		}
+	}
+
+	private Optional<Device> getRunningDeviceInfo(Execution execution,String macAddress) {
+		return deviceRepository.findByExecutionIdAndMacAddressAndExecutionStatus(
+			execution.getId(), macAddress, ExecutionStatus.STARTED);
+	}
+
+	private Optional<Execution> getLatestExecutionInfo(){
+		return executionRepository.findFirstByOrderByCreatedDateDesc();
+	}
+
+	private  Boolean checkLatestExecutionStatusNotStarted(Optional<Execution> optionalExecution){
+		return !optionalExecution.isPresent()
+			|| !optionalExecution.get().getExecutionStatus().equals(ExecutionStatus.STARTED);
+	}
+
+	@Transactional
+	Execution registerExecution(){
+		return executionRepository.save(new Execution());
 	}
 
 	private ExecutionResource createExecutionResource(Execution execution, Device device) {
@@ -77,44 +102,70 @@ public class ExecutionService {
 			.build();
 	}
 
+	@Transactional
 	Device registerDevice(String macAddress, Execution execution){
+		return deviceRepository.save(new Device(macAddress, execution));
+	}
 
-		 Optional<Device> optDevice = deviceRepository.findByExecutionIdAndMacAddress(
-			 execution.getId(), macAddress);
-		if(optDevice.isPresent()){
-			log.warn("getStartExecutionResult.registerDevice: execution-{} already exists with the mac address-{}"
-				, execution.getId(), macAddress);
-			return optDevice.get();
-		}else{
-			log.info("getStartExecutionResult.registerDevice: device-{} is registered with execution-{}"
-				, macAddress, execution.getId());
-			return deviceRepository.save(new Device(macAddress, execution));
+	public ExecutionResource getStopExecutionResult (long executionId, long deviceId) {
+
+		Execution execution = getRunningExecutionInfo(executionId);
+
+		Device device = getRunningDeviceInfo(deviceId);
+
+		updateDeviceStatus(device, ExecutionStatus.STOPPED);
+
+		List<Device> runningDevices = getAllRunningDevicesInExecution(executionId);
+		if(runningDevices.size()==0){
+			stopDaemon();
+			execution = updateExecution(execution, ExecutionStatus.STOPPED);
 		}
+
+		return createExecutionResource(execution, device);
+
+	}
+
+	private Device getRunningDeviceInfo(long deviceId){
+		Device device = deviceRepository.findById(deviceId)
+				.orElseThrow(NoSuchDeviceException::new);
+
+		if(!device.getExecutionStatus().equals(ExecutionStatus.STARTED)){
+			throw new NoRunningDeviceException();
+		}
+		return device;
+	}
+
+	private Execution getRunningExecutionInfo(long executionId){
+		Execution execution = executionRepository.findById(executionId)
+			.orElseThrow(NoSuchExecutionException::new);
+		if (!execution.getExecutionStatus().equals(ExecutionStatus.STARTED)) {
+			throw new NoRunningExecutionException();
+		}
+		return execution;
 	}
 
 	@Transactional
-	public ExecutionResource getStopExecutionResult(long id, String macAddress) {
-		Optional<Device> optDevice = deviceRepository.findByExecutionIdAndMacAddress(id, macAddress);
-		Device device = optDevice.orElseThrow(NoSuchDeviceException::new);
-		device.setExecutionStatus(ExecutionStatus.STOPPED);
+	void updateDeviceStatus(Device device, ExecutionStatus status){
+		device.setExecutionStatus(status);
 		deviceRepository.save(device);
+	}
 
-		Optional<Execution> optExecution = executionRepository.findFirstByOrderByCreatedDateDesc();
-		Execution execution = optExecution.orElseThrow(NoSuchExecutionException::new);
-		if (!execution.getExecutionStatus().equals(ExecutionStatus.STARTED)) {
-			throw new NoRunningExecutionException();
-		} else if (!execution.getId().equals(id)) {
-			throw new NoSuchExecutionException();
-		}
+	@Transactional
+	Execution updateExecution(Execution execution, ExecutionStatus status){
+		execution.setExecutionStatus(status);
+		return executionRepository.save(execution);
+	}
 
-		List<Device> runningDevices = deviceRepository.findByExecutionIdAndExecutionStatus(id, ExecutionStatus.STARTED);
-		if(runningDevices.size()==0){
-			execution.setExecutionStatus(ExecutionStatus.STOPPED);
-			daemonConfiguration.stopTaskExecutor();
-			return createExecutionResource(executionRepository.save(execution), device);
-		}else{
-			return createExecutionResource(execution, device);
-		}
+	private List<Device> getAllRunningDevicesInExecution(long executionId){
+		return deviceRepository.findByExecutionIdAndExecutionStatus(executionId, ExecutionStatus.STARTED);
+	}
+
+	private void stopDaemon(){
+		daemonConfiguration.stopTaskExecutor();
+	}
+
+	private void startDaemon(long executionId){
+		daemonConfiguration.launchTaskExecutor(executionId);
 	}
 
 	public Execution getSearchExecutionResult(long id){
@@ -122,7 +173,6 @@ public class ExecutionService {
 		Execution execution = optExecution.orElseThrow(NoSuchElementException::new);
 		return execution;
 	}
-
 
 	public Execution getCurrentExecution(){
 		Optional<Execution> optExecution = executionRepository.findFirstByOrderByCreatedDateDesc();
@@ -146,13 +196,23 @@ public class ExecutionService {
 	}
 
 	@PreDestroy
-	void setExecutionStatusAbandoned(){
+	void setStatusAbandoned(){
+		setExecutionStatusAbandoned();
+		setAllDeviceStatusAbandoned();
+	}
+
+	private void setExecutionStatusAbandoned(){
 		long id = daemonConfiguration.getRunningExecutionId();
-		Optional<Execution> optExecution = executionRepository.findById(id);
-		optExecution.ifPresent(o->{
-			o.setExecutionStatus(ExecutionStatus.ABANDONED);
-			executionRepository.save(o);
+		executionRepository.findById(id).ifPresent(o->{
+			updateExecution(o, ExecutionStatus.ABANDONED);
 		});
+	}
+
+	private void setAllDeviceStatusAbandoned(){
+		long id = daemonConfiguration.getRunningExecutionId();
+		List<Device> runningDevices
+			= deviceRepository.findByExecutionIdAndExecutionStatus(id, ExecutionStatus.STARTED);
+		runningDevices.forEach(device-> updateDeviceStatus(device, ExecutionStatus.ABANDONED));
 	}
 
 }

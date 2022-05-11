@@ -4,7 +4,6 @@ import java.util.Base64;
 
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.stereotype.Service;
@@ -44,9 +43,9 @@ public class AlertService {
 			.contentType(MediaType.APPLICATION_JSON)
 			.retrieve()
 			.bodyToMono(String.class)
-			.onErrorResume(e->Mono.just(e.getMessage()))
+			.onErrorResume(e->Mono.just(e.getMessage()));
 			//.doOnError(e-> {throw new SmicUnknownHttpException(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());})
-			.log();
+			//.log();
 
 		return log.block();
 	}

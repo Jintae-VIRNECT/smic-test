@@ -55,7 +55,7 @@ smic:
     # port: 8932
     pool-size: 3
     host: 222.98.122.50
-    port: 4860 #4850
+    port: 4890 #4850
   kiosk:
     user-id: kiosk1
     password: kiosk1234567890
