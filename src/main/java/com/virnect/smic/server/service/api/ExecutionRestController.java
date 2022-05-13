@@ -31,6 +31,7 @@ import com.virnect.smic.server.data.dto.response.SearchExecutionResource;
 import com.virnect.smic.server.data.dto.response.ExecutionResource;
 import com.virnect.smic.server.data.dto.response.ApiResponse;
 import com.virnect.smic.server.data.dto.response.StopExecutionModelAssembler;
+import com.virnect.smic.server.data.error.DuplicatedRunningDeviceException;
 import com.virnect.smic.server.data.error.DuplicatedRunningExecutionException;
 import com.virnect.smic.server.data.error.ErrorCode;
 import com.virnect.smic.server.data.error.NoRunningExecutionException;
@@ -64,13 +65,20 @@ public class ExecutionRestController {
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(new ApiResponse<ExecutionResource>(startAssembler.withModel(execution)));
 
-		 } catch (DuplicatedRunningExecutionException de) {
+		 }  catch (DuplicatedRunningExecutionException de) {
 			return ResponseEntity.badRequest()
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(new ApiResponse<ExecutionResource>(
 					startAssembler.withoutModel(de),
-				ErrorCode.ERR_EXECUTION_DATA_DUPLICATED
-			));
+					ErrorCode.ERR_EXECUTION_DATA_DUPLICATED
+				));
+		} catch (DuplicatedRunningDeviceException dde) {
+			return ResponseEntity.badRequest()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(new ApiResponse<ExecutionResource>(
+					startAssembler.withoutModel(dde),
+					ErrorCode.ERR_DEVICE_DATA_DUPLICATED
+				));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)

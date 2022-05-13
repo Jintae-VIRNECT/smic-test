@@ -11,7 +11,9 @@ public enum ErrorCode {
 	ERR_EXECUTION_DATA_NULL(3002, "No such execution data error"),
 	ERR_EXECUTION_DATA_DUPLICATED(3003,
 		"running execution data already exists. please stop the execution first."),
-	ERR_EXECUTION_DATA_NOT_RUNNING(3003, "No running execution data exits"),
+	ERR_DEVICE_DATA_DUPLICATED(3004,
+		"running device data already exists. please stop the device first."),
+	ERR_EXECUTION_DATA_NOT_RUNNING(3005, "No running execution data exits"),
 	ERR_ORDER_DATA_NULL(3102, "No such order data error"),
 
 	// EXTERNAL ERR

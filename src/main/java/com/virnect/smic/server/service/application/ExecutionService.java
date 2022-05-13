@@ -1,5 +1,6 @@
 package com.virnect.smic.server.service.application;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ import com.virnect.smic.server.data.dto.response.ExecutionListResponse;
 import com.virnect.smic.server.data.dto.response.PageMetadataResponse;
 import com.virnect.smic.server.data.dto.response.SearchExecutionResource;
 import com.virnect.smic.server.data.dto.response.ExecutionResource;
+import com.virnect.smic.server.data.error.DuplicatedRunningDeviceException;
 import com.virnect.smic.server.data.error.DuplicatedRunningExecutionException;
 
 @Slf4j
@@ -46,30 +48,36 @@ public class ExecutionService extends BaseService {
 
 	public ExecutionResource getStartExecutionResult(String macAddress){
 
-		Optional<Execution> optionalExecution = getLatestExecutionInfo();
+		Optional<Execution> latestExecution = getLatestExecutionInfo();
 
-		if(checkLatestExecutionStatusNotStarted(optionalExecution)){
-			Execution execution = registerExecution();
+		if(checkLatestExecutionStatusNotStarted(latestExecution)){
+			Execution registeredExecution = registerExecution();
+			startDaemon(registeredExecution.getId());
 
-			Device device = new Device();
-			if(!macAddress.equalsIgnoreCase("all"))
-				device = registerDevice(macAddress, execution);
-
-			startDaemon(execution.getId());
-
-			return createExecutionResource(execution, List.of(device));
+			return getStartExecutionResource(macAddress, registeredExecution);
 		}
 		// 이미 execution이 존재하지만 STARTED 상태인 경우
 		else{
-			Execution execution = optionalExecution.get();
-			if(getRunningDeviceInfo(execution, macAddress).isPresent()){
-				throw new DuplicatedRunningExecutionException(execution.getId());
+			Execution runningExecution = latestExecution.get();
+			Optional<Device> runningDevice = getRunningDeviceInfo(runningExecution, macAddress);
+
+			if(runningDevice.isPresent()){
+				ExecutionResource response = createExecutionResource(runningExecution, List.of(runningDevice.get()));
+				throw new DuplicatedRunningDeviceException(response);
 			}else{
-				Device device = registerDevice(macAddress, execution);
-				return createExecutionResource(execution, List.of(device));
+				ExecutionResource response = getStartExecutionResource(macAddress, runningExecution);
+				throw new DuplicatedRunningExecutionException(response);
 			}
 
 		}
+	}
+
+	private ExecutionResource getStartExecutionResource(String macAddress, Execution execution) {
+		if(macAddress.equalsIgnoreCase("all"))
+			return createExecutionResource(execution, Collections.EMPTY_LIST);
+		else
+			return createExecutionResource(execution, List.of(registerDevice(macAddress, execution))
+			);
 	}
 
 	private Optional<Device> getRunningDeviceInfo(Execution execution,String macAddress) {

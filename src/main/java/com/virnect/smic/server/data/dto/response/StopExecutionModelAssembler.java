@@ -3,6 +3,8 @@ package com.virnect.smic.server.data.dto.response;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import java.util.Collections;
+
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -31,7 +33,7 @@ public class StopExecutionModelAssembler {
 
 	public ExecutionResource withoutModel(Long id, Exception e){
 		ExecutionResource resource = ExecutionResource.builder().build();
-
+		resource.setDevices(Collections.EMPTY_LIST);
 		if(e instanceof NoRunningExecutionException){
 			resource.add(linkTo(ExecutionRestController.class).slash("latest").withRel("search-latest"));
 			resource.add(linkTo(ExecutionRestController.class).slash(id).withRel("search"));

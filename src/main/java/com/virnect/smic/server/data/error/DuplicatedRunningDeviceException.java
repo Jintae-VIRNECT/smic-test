@@ -5,10 +5,10 @@ import lombok.Getter;
 import com.virnect.smic.server.data.dto.response.ExecutionResource;
 
 @Getter
-public class DuplicatedRunningExecutionException extends RuntimeException{
+public class DuplicatedRunningDeviceException extends RuntimeException{
 
 	private ExecutionResource executionResource;
-	public DuplicatedRunningExecutionException(ExecutionResource execution) {
+	public DuplicatedRunningDeviceException(ExecutionResource execution) {
 		this.executionResource = execution;
 	}
 }
