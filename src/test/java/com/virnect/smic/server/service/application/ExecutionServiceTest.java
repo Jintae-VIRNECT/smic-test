@@ -42,7 +42,7 @@ class ExecutionServiceTest {
 
 	@BeforeEach
 	 void setExecutionService(){
-		executionService = new ExecutionService(executionRepository, deviceRepository, daemonConfiguration, modelMapper);
+		executionService = new ExecutionService(deviceRepository, executionRepository, daemonConfiguration, modelMapper);
 	}
 
 	@Test

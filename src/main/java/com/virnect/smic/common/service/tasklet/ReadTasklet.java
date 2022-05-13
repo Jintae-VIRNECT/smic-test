@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import com.virnect.smic.common.config.annotation.TimeLogTrace;
 import com.virnect.smic.common.data.domain.ExecutionStatus;
 import com.virnect.smic.common.data.domain.Tag;
+import com.virnect.smic.common.data.domain.TaskletStatus;
 import com.virnect.smic.common.data.dto.TagDto;
 import com.virnect.smic.daemon.mq.ProducerManager;
 
@@ -146,13 +147,13 @@ public class ReadTasklet {
 
 	void publishAndLogAsync(ConcurrentHashMap<String, String> result, String uuid){
 		result.entrySet().stream().forEach(item->{
-			ExecutionStatus status = ExecutionStatus.UNKNOWN;
+			TaskletStatus status = TaskletStatus.UNKNOWN;
 			try {
 				status = producerManager.runProducer(1, item.getKey(), item.getValue());
 				
 			} catch (IOException e) {
 				e.printStackTrace();
-				status = ExecutionStatus.FAILED;
+				status = TaskletStatus.FAILED;
 			} finally {
 				log.info("[{}] {} {} [{}] {} [{}]"
 				, uuid

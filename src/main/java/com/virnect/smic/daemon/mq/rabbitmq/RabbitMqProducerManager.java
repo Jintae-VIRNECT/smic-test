@@ -1,13 +1,11 @@
 package com.virnect.smic.daemon.mq.rabbitmq;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.concurrent.TimeoutException;
 
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.ConfirmListener;
 import com.rabbitmq.client.ConnectionFactory;
-import com.virnect.smic.common.data.domain.ExecutionStatus;
+import com.virnect.smic.common.data.domain.TaskletStatus;
 import com.virnect.smic.daemon.mq.ProducerManager;
 
 import org.springframework.amqp.core.AmqpTemplate;
@@ -71,23 +69,23 @@ public class RabbitMqProducerManager implements ProducerManager {
         return template;
     }
 
-    public ExecutionStatus runProducer(int i, String queueName, String value) {
+    public TaskletStatus runProducer(int i, String queueName, String value) {
         try {
             producer.basicPublish("amq.topic", queueName, true, null, value.getBytes("UTF-8") );
-            return ExecutionStatus.COMPLETED;
+            return TaskletStatus.COMPLETED;
         } catch (Exception e) {
             e.printStackTrace();
-            return ExecutionStatus.FAILED;
+            return TaskletStatus.FAILED;
         }
     }
 
-    public ExecutionStatus runProducerTemplate(int i, String queueName, String value) {
+    public TaskletStatus runProducerTemplate(int i, String queueName, String value) {
         try {
             template.sendAndReceive("amq.topic", queueName,new Message(value.getBytes()));
-            return ExecutionStatus.COMPLETED;
+            return TaskletStatus.COMPLETED;
         } catch (Exception e) {
             e.printStackTrace();
-            return ExecutionStatus.FAILED;
+            return TaskletStatus.FAILED;
         }
     }
 

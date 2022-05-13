@@ -23,7 +23,6 @@ import com.virnect.smic.server.service.api.OrderRestController;
 public class OrderModelAssembler extends
 	RepresentationModelAssemblerSupport<Order, OrderResource> {
 
-	@Autowired
 	private  ModelMapper modelMapper;
 
 	public OrderModelAssembler(Class<?> controllerClass
@@ -35,6 +34,11 @@ public class OrderModelAssembler extends
 		super(OrderRestController.class, OrderResource.class);
 	}
 
+	@Autowired
+	public OrderModelAssembler(ModelMapper modelMapper) {
+		super(OrderRestController.class, OrderResource.class);
+		this.modelMapper = modelMapper;
+	}
 
 	@Override
 	public OrderResource toModel(Order entity) {

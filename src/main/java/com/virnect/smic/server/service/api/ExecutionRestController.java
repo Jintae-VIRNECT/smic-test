@@ -9,6 +9,7 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +39,7 @@ import com.virnect.smic.server.service.application.ExecutionService;
 
 @Slf4j
 @RestController
+@CrossOrigin("*")
 @RequiredArgsConstructor
 @RequestMapping("/executions")
 public class ExecutionRestController {
@@ -119,14 +121,13 @@ public class ExecutionRestController {
 		getExecution(@PathVariable(name = "id", required = true) Long id) {
 
 		try {
-			Execution execution = executionService.getSearchExecutionResult(id);
+			Execution execution = executionService.getExecutionInfo(id);
 
 			SearchExecutionResource executionResource = searchAssembler.toModel(execution);
 
 			// add link
 			WebMvcLinkBuilder selfBuilder = linkTo(ExecutionRestController.class).slash(id);
 			executionResource.add(selfBuilder.withSelfRel());
-			//executionResource.add(selfBuilder.withRel("stop"));
 
 			return ResponseEntity.status(HttpStatus.OK)
 				.body(new ApiResponse<SearchExecutionResource>(executionResource));

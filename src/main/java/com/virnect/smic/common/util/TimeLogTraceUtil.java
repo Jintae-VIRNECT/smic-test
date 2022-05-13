@@ -1,7 +1,7 @@
 package com.virnect.smic.common.util;
 
-
-import com.virnect.smic.common.data.domain.ExecutionStatus;
+import com.virnect.smic.common.data.domain.TaskStatus;
+import com.virnect.smic.common.data.domain.TaskletStatus;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,7 +23,7 @@ public class TimeLogTraceUtil implements LogTrace {
         Long startTimeMs = System.currentTimeMillis();
         //log.info("[{}] {}[class]:{} ", traceId.getId(), addSpace(START_PREFIX, traceId.getLevel()), className);
         log.info("[{}] {} {} {} {}"
-        , traceId.getId(), methodName, ExecutionStatus.STARTED, 0, NO_ERROR_MESSAGE);
+        , traceId.getId(), methodName, TaskStatus.STARTED, 0, NO_ERROR_MESSAGE);
         return new TraceStatus(traceId, startTimeMs, className, methodName);
     }
 
@@ -52,11 +52,11 @@ public class TimeLogTraceUtil implements LogTrace {
         TraceId traceId = status.getTraceId();
         if (e == null) {
             log.info("[{}] {} {} {} {}"
-            , traceId.getId(), status.getMethodName(), ExecutionStatus.COMPLETED, resultTimeMs
+            , traceId.getId(), status.getMethodName(), TaskStatus.COMPLETED, resultTimeMs
             , NO_ERROR_MESSAGE);
         } else {
             log.info("[{}] {} {} {} {}"
-            , traceId.getId(), status.getMethodName(), ExecutionStatus.FAILED, resultTimeMs
+            , traceId.getId(), status.getMethodName(), TaskStatus.FAILED, resultTimeMs
             , e.toString());
         }
 

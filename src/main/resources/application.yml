@@ -21,13 +21,17 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: false
-    show-sql: true
+    show-sql: false
   hateoas:
     use-hal-as-default-json-media-type: false
   boot:
     admin:
       client:
         url: http://localhost:8090
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: false
 
 #springdoc:
 #  use-management-port: true
@@ -55,7 +59,7 @@ smic:
     # port: 8932
     pool-size: 3
     host: 222.98.122.50
-    port: 4890 #4850
+    port: 4850 #4850
   kiosk:
     user-id: kiosk1
     password: kiosk1234567890

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import com.virnect.smic.common.data.domain.ExecutionStatus;
+import com.virnect.smic.common.data.domain.TaskletStatus;
 import com.virnect.smic.daemon.mq.ProducerManager;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -49,7 +50,7 @@ public class KafkaProducerManager implements ProducerManager {
 		return new KafkaProducer<>(props);
 	}
 
-	public ExecutionStatus runProducer(final int sendMessageCount, String topic, String value) throws IOException {
+	public TaskletStatus runProducer(final int sendMessageCount, String topic, String value) throws IOException {
 		
 		long time = System.currentTimeMillis();
 
@@ -70,10 +71,10 @@ public class KafkaProducerManager implements ProducerManager {
 				
 
 			}
-			return ExecutionStatus.COMPLETED;
+			return TaskletStatus.COMPLETED;
 		}catch (Exception e){
 			e.printStackTrace();
-			return ExecutionStatus.FAILED;
+			return TaskletStatus.FAILED;
 		}
 		// finally {
 		// 	producer.flush();

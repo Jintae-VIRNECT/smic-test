@@ -18,13 +18,13 @@ import com.virnect.smic.server.service.api.ExecutionRestController;
 @Getter @Setter
 public class StopExecutionModelAssembler {
 
-	public ExecutionResource withModel(ExecutionResource execution){
-		ExecutionResource resource = execution;
+	public ExecutionResource withModel(ExecutionResource resource){
+
 		resource.add(linkTo(ExecutionRestController.class)
 			.withRel("execution"));
 		resource.add(linkTo(DeviceRestController.class)
 			.withRel("device"));
-		resource.add(linkTo(ExecutionRestController.class).slash(execution.getExecutionId()).withSelfRel());
+		resource.add(linkTo(ExecutionRestController.class).slash(resource.getExecutionId()).withSelfRel());
 
 		return resource;
 	}

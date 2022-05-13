@@ -1,5 +1,8 @@
 package com.virnect.smic.common.data.domain;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema
 public enum ExecutionStatus {
-	COMPLETED, STARTING, STARTED, STOPPING, STOPPED, FAILED, ABANDONED, UNKNOWN;
+	STARTED, STOPPED, ABANDONED, UNKNOWN;
 }

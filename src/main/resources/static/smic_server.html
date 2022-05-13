@@ -1,0 +1,135 @@
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1, maximum-scale=0.6">
+<title>SMIC Server Control</title>
+<style>
+.big_button
+{
+	font-size : 40pt;
+	padding: 80pt;
+}
+</style>
+<script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
+<script>
+
+	$(function() {
+		$("#startButton").on("click",function() {
+			$.ajax({
+				url: "http://211.50.11.85:8080/executions",
+				type: "POST",
+				crossDomain: true,
+				data: { "macAddress" : "all" },
+				dataType: "json",
+				success:function(result){
+					//console.log(result.code);
+					showStatus(1);
+				},
+				error:function(xhr,status,error){
+					
+					console.log(xhr.responseJSON);
+					if(xhr.responseJSON.code == 3003)
+					{
+						alert(xhr.responseJSON.message);
+					}
+					
+					console.log(status);
+				}
+			});
+		});
+	});
+	
+	$(function() {
+		$("#stopButton").on("click",function() {
+			$.ajax({
+				url: "http://211.50.11.85:8080/devices/all",
+				type: "DELETE",
+				crossDomain: true,
+				dataType: "json",
+				success:function(result){
+					showStatus(0);
+				},
+				error:function(xhr,status,error){
+					console.log(status);
+				}
+			});
+		});
+	});
+	
+	
+	// Check Devices
+	$(document).ready(function()
+	{
+		CheckStatus();
+		setInterval(CheckStatus,3000);
+	});
+	
+	
+	function CheckStatus()
+	{
+		$.ajax({
+		url: "http://211.50.11.85:8080/executions/latest",
+		type: "GET",
+		async: "false",				
+		crossDomain: true,
+		dataType: "json",
+		success:function(result){
+			var statusStr = "";
+			var statusColor = "white";
+			var statusExe = result.data.executionStatus.toLowerCase();
+			if(statusExe.indexOf("start")!=-1)
+			{
+				showStatus(1);
+			}
+			else if(statusExe.indexOf("stop")!=-1)
+			{
+				showStatus(0);
+			}
+
+		},
+		error:function(xhr,status,error){
+			showStatus(-1);
+		}
+	});
+	}
+	
+	// 0 - stop, 1 - running, -1 - Error
+	function showStatus(statusIndex)
+	{
+		var statusStr = "";
+		var statusColor = "white";
+		
+		switch(statusIndex)
+		{
+			case 0:
+				statusStr = "STOPPED";
+				statusColor = "gray";
+				break;
+			case 1:
+				statusStr = "RUNNING";
+				statusColor = "blue";
+				break;
+			case 2:
+				statusStr = "SERVER ERROR";
+				statusColor = "red";
+				break;
+		}
+		$("#statusArea").css('color',statusColor);
+		$("#statusArea").html(statusStr);
+	}
+
+</script> 
+</head>
+<body>
+<center>
+<br><br>
+<h1>SMIC MQ Server Control</h1>
+<br><br>
+<button id='startButton' class='big_button' >Start Server</button>
+<br><br>
+<button id='stopButton' class='big_button' >Stop Server</button>
+<br><br><br><br>
+STATUS : <span id='statusArea'></span>
+<br>
+</center>
+</body>
+</html>

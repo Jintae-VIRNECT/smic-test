@@ -21,4 +21,6 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
 	Optional<Device> findFirstByExecutionIdAndMacAddressOrderByCreatedDateDesc(long executionId, String macAddress);
 
 	List<Device> findByExecutionStatus(ExecutionStatus started);
+
+	List<Device> findAllByExecutionId(long executionId);
 }

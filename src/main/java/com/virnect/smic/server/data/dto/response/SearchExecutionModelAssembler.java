@@ -30,14 +30,12 @@ public class SearchExecutionModelAssembler extends
 
 	@Override
 	public SearchExecutionResource toModel(Execution entity) {
-		SearchExecutionResource resource = SearchExecutionResource.builder()
+		return SearchExecutionResource.builder()
 											.executionId(entity.getId())
 											.executionStatus(entity.getExecutionStatus())
 											.createdDate(entity.getUpdatedDate())
 											.updatedDate(entity.getUpdatedDate())
 											.build();
-
-		return resource;
 	}
 
 	public SearchExecutionResource withoutModel(long executionId, Exception e){

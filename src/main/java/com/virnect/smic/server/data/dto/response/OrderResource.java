@@ -19,6 +19,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Schema(name="orderResponse", description = "주문 응답")
 public class OrderResource extends RepresentationModel<OrderResource> {
+	@Schema(name="id", description = "주문 id", example = "1", type = "long")
 	private Long id;
 
 	@Schema(name="executionId", description = "현재 진행 중인 작업 id", example="1", type="long")
