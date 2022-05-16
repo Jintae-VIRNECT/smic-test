@@ -26,10 +26,10 @@ class DeviceServiceTest {
 	DeviceRepository deviceRepository;
 
 	@Mock
-	ExecutionRepository executionRepository;
+	DaemonConfiguration daemonConfiguration;
 
 	@Mock
-	DaemonConfiguration daemonConfiguration;
+	ExecutionService executionService;
 
 	DeviceService deviceService;
 
@@ -47,7 +47,7 @@ class DeviceServiceTest {
 
 	@BeforeEach
 	void initService(){
-		deviceService = new DeviceService(deviceRepository, executionRepository, daemonConfiguration);
+		deviceService = new DeviceService(deviceRepository, daemonConfiguration, executionService);
 	}
 
 	@Test

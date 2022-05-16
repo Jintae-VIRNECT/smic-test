@@ -38,11 +38,15 @@ class ExecutionServiceTest {
 	@Mock
 	 ExecutionRepository executionRepository;
 
-	 ExecutionService executionService;
+	@Mock
+	DeviceService deviceService;
+
+	ExecutionService executionService;
 
 	@BeforeEach
 	 void setExecutionService(){
-		executionService = new ExecutionService(deviceRepository, executionRepository, daemonConfiguration, modelMapper);
+		executionService = new ExecutionService(
+			deviceRepository, executionRepository, daemonConfiguration, modelMapper,deviceService);
 	}
 
 	@Test

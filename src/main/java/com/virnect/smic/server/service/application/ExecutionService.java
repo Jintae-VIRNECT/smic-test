@@ -2,10 +2,14 @@ package com.virnect.smic.server.service.application;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.PreDestroy;
+
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,8 @@ import com.virnect.smic.server.data.dto.response.SearchExecutionResource;
 import com.virnect.smic.server.data.dto.response.ExecutionResource;
 import com.virnect.smic.server.data.error.DuplicatedRunningDeviceException;
 import com.virnect.smic.server.data.error.DuplicatedRunningExecutionException;
+import com.virnect.smic.server.data.error.NoRunningExecutionException;
+import com.virnect.smic.server.data.error.NoSuchExecutionException;
 
 @Slf4j
 @Service
@@ -33,17 +39,22 @@ public class ExecutionService extends BaseService {
 	private final ExecutionRepository executionRepository;
 	private final DeviceRepository deviceRepository;
 	private final ModelMapper modelMapper;
+	private final DaemonConfiguration daemonConfiguration;
+	private final DeviceService deviceService;
 
 	public ExecutionService(
 		DeviceRepository deviceRepository,
 		ExecutionRepository executionRepository,
 		DaemonConfiguration daemonConfiguration,
-		ModelMapper modelMapper
+		ModelMapper modelMapper,
+		@Lazy DeviceService deviceService
 	) {
-		super(deviceRepository, executionRepository, daemonConfiguration);
+		super(daemonConfiguration);
 		this.executionRepository = executionRepository;
 		this.deviceRepository = deviceRepository;
 		this.modelMapper = modelMapper;
+		this.daemonConfiguration = daemonConfiguration;
+		this.deviceService = deviceService;
 	}
 
 	public ExecutionResource getStartExecutionResult(String macAddress){
@@ -59,7 +70,7 @@ public class ExecutionService extends BaseService {
 		// 이미 execution이 존재하지만 STARTED 상태인 경우
 		else{
 			Execution runningExecution = latestExecution.get();
-			Optional<Device> runningDevice = getRunningDeviceInfo(runningExecution, macAddress);
+			Optional<Device> runningDevice = deviceService.getOptionalRunningDeviceInfo(runningExecution, macAddress);
 
 			if(runningDevice.isPresent()){
 				ExecutionResource response = createExecutionResource(runningExecution, List.of(runningDevice.get()));
@@ -78,11 +89,6 @@ public class ExecutionService extends BaseService {
 		else
 			return createExecutionResource(execution, List.of(registerDevice(macAddress, execution))
 			);
-	}
-
-	private Optional<Device> getRunningDeviceInfo(Execution execution,String macAddress) {
-		return deviceRepository.findByExecutionIdAndMacAddressAndExecutionStatus(
-			execution.getId(), macAddress, ExecutionStatus.STARTED);
 	}
 
 	private Optional<Execution> getLatestExecutionInfo(){
@@ -106,13 +112,13 @@ public class ExecutionService extends BaseService {
 
 	public ExecutionResource getStopExecutionResult (long executionId, long deviceId) {
 
-		Execution execution = getRunningExecutionInfo(executionId);
+		Execution execution = getRunningExecutionById(executionId);
 
-		Device device = getRunningDeviceInfo(deviceId);
+		Device device = deviceService.getRunningDeviceInfo(deviceId);
 
-		updateDeviceStatus(device, ExecutionStatus.STOPPED);
+		deviceService.updateDeviceStatus(device, ExecutionStatus.STOPPED);
 
-		List<Device> runningDevices = getAllRunningDevices(executionId);
+		List<Device> runningDevices = deviceService.getAllRunningDevices(executionId);
 		if(runningDevices.size()==0){
 			stopDaemon();
 			execution = updateExecution(execution, ExecutionStatus.STOPPED);
@@ -143,4 +149,47 @@ public class ExecutionService extends BaseService {
 		return new ExecutionListResponse(content, pageMeta);
 	}
 
+	Execution getRunningExecutionById(long executionId){
+		Execution execution = executionRepository.findById(executionId)
+			.orElseThrow(NoSuchExecutionException::new);
+		if (!execution.getExecutionStatus().equals(ExecutionStatus.STARTED)) {
+			throw new NoRunningExecutionException();
+		}
+		return execution;
+	}
+
+	Execution getCurrentlyRunningExecution(){
+		Execution execution
+			= executionRepository.findFirstByOrderByCreatedDateDesc().orElseThrow(NoRunningExecutionException::new);
+
+		if(execution.getExecutionStatus().equals(ExecutionStatus.STARTED)){
+			return execution;
+		}else{
+			throw new NoRunningExecutionException();
+		}
+	}
+
+	@Transactional
+	Execution updateExecution(Execution execution, ExecutionStatus status){
+		execution.setExecutionStatus(status);
+		return executionRepository.save(execution);
+	}
+
+	public Execution getExecutionInfo(long id){
+		Optional<Execution> optExecution = executionRepository.findById(id);
+		Execution execution = optExecution.orElseThrow(NoSuchElementException::new);
+		return execution;
+	}
+
+	@PreDestroy
+	void setStatusAbandoned(){
+		setExecutionStatusAbandoned();
+	}
+
+	private void setExecutionStatusAbandoned(){
+		long id = daemonConfiguration.getRunningExecutionId();
+		executionRepository.findById(id).ifPresent(o->{
+			updateExecution(o, ExecutionStatus.ABANDONED);
+		});
+	}
 }

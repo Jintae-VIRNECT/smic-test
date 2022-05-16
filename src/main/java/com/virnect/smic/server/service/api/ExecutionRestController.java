@@ -66,14 +66,14 @@ public class ExecutionRestController {
 				.body(new ApiResponse<ExecutionResource>(startAssembler.withModel(execution)));
 
 		 }  catch (DuplicatedRunningExecutionException de) {
-			return ResponseEntity.badRequest()
+			return ResponseEntity.status(HttpStatus.OK)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(new ApiResponse<ExecutionResource>(
 					startAssembler.withoutModel(de),
 					ErrorCode.ERR_EXECUTION_DATA_DUPLICATED
 				));
 		} catch (DuplicatedRunningDeviceException dde) {
-			return ResponseEntity.badRequest()
+			return ResponseEntity.status(HttpStatus.OK)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(new ApiResponse<ExecutionResource>(
 					startAssembler.withoutModel(dde),

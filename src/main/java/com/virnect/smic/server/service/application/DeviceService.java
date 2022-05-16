@@ -1,38 +1,49 @@
 package com.virnect.smic.server.service.application;
 
 import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.PreDestroy;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.virnect.smic.common.data.domain.Device;
 import com.virnect.smic.common.data.domain.Execution;
 import com.virnect.smic.common.data.domain.ExecutionStatus;
 import com.virnect.smic.daemon.config.DaemonConfiguration;
 import com.virnect.smic.server.data.dao.DeviceRepository;
-import com.virnect.smic.server.data.dao.ExecutionRepository;
 import com.virnect.smic.server.data.dto.response.ExecutionResource;
-import com.virnect.smic.server.data.error.NoRunningExecutionException;
+import com.virnect.smic.server.data.error.NoRunningDeviceException;
+import com.virnect.smic.server.data.error.NoSuchDeviceException;
 
 @Service
 public class DeviceService extends BaseService {
 
-	private final ExecutionRepository executionRepository;
+	private final DeviceRepository deviceRepository;
+
+	private final DaemonConfiguration daemonConfiguration;
+
+	private final ExecutionService executionService;
 
 	public DeviceService(
 		DeviceRepository deviceRepository,
-		ExecutionRepository executionRepository,
-		DaemonConfiguration daemonConfiguration
+		DaemonConfiguration daemonConfiguration,
+		ExecutionService executionService
 	) {
-		super(deviceRepository, executionRepository, daemonConfiguration);
-		this.executionRepository = executionRepository;
+		super(daemonConfiguration);
+		this.deviceRepository = deviceRepository;
+		this.daemonConfiguration = daemonConfiguration;
+		this.executionService = executionService;
 	}
 
 	public ExecutionResource releaseAllDevices(){
-		Execution execution = getCurrentlyRunningExecution();
+		Execution execution = executionService.getCurrentlyRunningExecution();
 		updateAllDeviceStatusStopped(getAllRunningDevices(execution.getId()));
 		stopDaemon();
-		updateExecution(execution, ExecutionStatus.STOPPED);
-		return createExecutionResource(getExecutionInfo(execution.getId()), getDevicesInExecution(execution.getId()));
+		executionService.updateExecution(execution, ExecutionStatus.STOPPED);
+		return createExecutionResource(
+			executionService.getExecutionInfo(execution.getId()), getDevicesInExecution(execution.getId()));
 	}
 
 	List<Device> updateAllDeviceStatusStopped(List<Device> devices){
@@ -40,18 +51,53 @@ public class DeviceService extends BaseService {
 		return devices;
 	}
 
-	private Execution getCurrentlyRunningExecution(){
-		Execution execution
-			= executionRepository.findFirstByOrderByCreatedDateDesc().orElseThrow(NoRunningExecutionException::new);
-
-		if(execution.getExecutionStatus().equals(ExecutionStatus.STARTED)){
-			return execution;
-		}else{
-			throw new NoRunningExecutionException();
-		}
+	public ExecutionResource getDevicesWithExecution(long executionId){
+		return createExecutionResource(
+			executionService.getExecutionInfo(executionId), getDevicesInExecution(executionId));
 	}
 
-	public ExecutionResource getDevicesWithExecution(long executionId){
-		return createExecutionResource(getExecutionInfo(executionId), getDevicesInExecution(executionId));
+	public Device getDeviceInfo(long deviceId){
+		return deviceRepository.findById(deviceId)
+			.orElseThrow(NoSuchDeviceException::new);
+	}
+
+	Device getRunningDeviceInfo(long deviceId){
+		Device device = getDeviceInfo(deviceId);
+
+		if(!device.getExecutionStatus().equals(ExecutionStatus.STARTED)){
+			throw new NoRunningDeviceException();
+		}
+		return device;
+	}
+
+	Optional<Device> getOptionalRunningDeviceInfo(Execution execution,String macAddress) {
+		return deviceRepository.findByExecutionIdAndMacAddressAndExecutionStatus(
+			execution.getId(), macAddress, ExecutionStatus.STARTED);
+	}
+
+	List<Device> getAllRunningDevices(long executionId) {
+		return deviceRepository.findByExecutionIdAndExecutionStatus(executionId, ExecutionStatus.STARTED);
+	}
+
+	List<Device> getDevicesInExecution(long executionId){
+		return deviceRepository.findAllByExecutionId(executionId);
+	}
+
+	@PreDestroy
+	void setStatusAbandoned(){
+		setAllDeviceStatusAbandoned();
+	}
+
+	@Transactional
+	void updateDeviceStatus(Device device, ExecutionStatus status){
+		device.setExecutionStatus(status);
+		deviceRepository.save(device);
+	}
+
+	void setAllDeviceStatusAbandoned(){
+		long id = daemonConfiguration.getRunningExecutionId();
+		List<Device> runningDevices
+			= deviceRepository.findByExecutionIdAndExecutionStatus(id, ExecutionStatus.STARTED);
+		runningDevices.forEach(device-> updateDeviceStatus(device, ExecutionStatus.ABANDONED));
 	}
 }
