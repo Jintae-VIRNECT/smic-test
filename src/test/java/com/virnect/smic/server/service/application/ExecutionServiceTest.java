@@ -21,7 +21,7 @@ import com.virnect.smic.common.data.domain.ExecutionStatus;
 import com.virnect.smic.daemon.config.DaemonConfiguration;
 import com.virnect.smic.server.data.dao.DeviceRepository;
 import com.virnect.smic.server.data.dao.ExecutionRepository;
-import com.virnect.smic.server.data.error.DuplicatedRunningExecutionException;
+import com.virnect.smic.server.data.error.exception.DuplicatedRunningExecutionException;
 
 @ExtendWith(MockitoExtension.class)
 class ExecutionServiceTest {

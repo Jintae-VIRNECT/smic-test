@@ -28,10 +28,10 @@ import com.virnect.smic.server.data.dto.response.ExecutionListResponse;
 import com.virnect.smic.server.data.dto.response.PageMetadataResponse;
 import com.virnect.smic.server.data.dto.response.SearchExecutionResource;
 import com.virnect.smic.server.data.dto.response.ExecutionResource;
-import com.virnect.smic.server.data.error.DuplicatedRunningDeviceException;
-import com.virnect.smic.server.data.error.DuplicatedRunningExecutionException;
-import com.virnect.smic.server.data.error.NoRunningExecutionException;
-import com.virnect.smic.server.data.error.NoSuchExecutionException;
+import com.virnect.smic.server.data.error.exception.DuplicatedRunningDeviceException;
+import com.virnect.smic.server.data.error.exception.DuplicatedRunningExecutionException;
+import com.virnect.smic.server.data.error.exception.NoRunningExecutionException;
+import com.virnect.smic.server.data.error.exception.NoSuchExecutionException;
 
 @Slf4j
 @Service

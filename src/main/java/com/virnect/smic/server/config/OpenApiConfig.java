@@ -1,7 +1,6 @@
 package com.virnect.smic.server.config;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.classmate.TypeResolver;
@@ -27,7 +26,6 @@ import springfox.documentation.oas.annotations.EnableOpenApi;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.service.Response;
-import springfox.documentation.service.Server;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
@@ -40,8 +38,8 @@ public class OpenApiConfig {
 	private final ObjectMapper objectMapper;
 	private final Environment env;
 
-    String title = "VIRNECT SMIC API Document.";
-    String version = "v1.0";
+	private final String TITLE = "VIRNECT SMIC API Document.";
+	private final String VERSION = "v1.0";
 
     @Bean
 	public List<Response> globalResponseMessage() {
@@ -64,11 +62,6 @@ public class OpenApiConfig {
 
 	@Bean
 	public Docket api() {
-		// String serverUrl = env.getProperty("server.host") + ":" + env.getProperty("server.port");
-		//  Server server = new Server("smic-api-server", serverUrl, "smic-api-server"
-		//  	, Collections.emptyList(), Collections.emptyList());
-
-
 		return new Docket(DocumentationType.OAS_30)
 			//.enableUrlTemplating(true)
 			.ignoredParameterTypes(Errors.class)
@@ -77,8 +70,6 @@ public class OpenApiConfig {
 			.globalResponses(HttpMethod.POST, globalResponseMessage())
 			.globalResponses(HttpMethod.PUT, globalResponseMessage())
 			.globalResponses(HttpMethod.DELETE, globalResponseMessage())
-			//.servers(server)
-			//.host(serverUrl)
 			.select()
 			.apis(RequestHandlerSelectors.basePackage("com.virnect.smic.server"))
 			.paths(PathSelectors.any())
@@ -90,9 +81,9 @@ public class OpenApiConfig {
 	private ApiInfo apiInfo() {
 		return new ApiInfoBuilder()
 			.contact(new Contact("Sangeun Oh", "https://virnect.com", "sangeun@virnect.com"))
-			.title(title)
+			.title(TITLE)
 			.description("SMIC API Docs")
-			.version(version)
+			.version(VERSION)
 			.license("VIRNECT INC All rights reserved")
 			.build();
 	}

@@ -1,4 +1,4 @@
-package com.virnect.smic.server.data.dto.response.smic;
+package com.virnect.smic.server.data.dto.response;
 
 import java.util.List;
 

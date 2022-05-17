@@ -1,10 +1,7 @@
-package com.virnect.smic.server.data.error;
+package com.virnect.smic.server.data.error.exception;
 
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class NoSuchOrderException extends RuntimeException {
-	public NoSuchOrderException(String s) {
-		super(s);
-	}
 }

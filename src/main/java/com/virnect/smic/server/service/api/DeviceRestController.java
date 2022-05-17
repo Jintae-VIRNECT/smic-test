@@ -20,11 +20,11 @@ import lombok.RequiredArgsConstructor;
 import com.virnect.smic.server.data.dto.response.ApiResponse;
 import com.virnect.smic.server.data.dto.response.DeviceResource;
 import com.virnect.smic.server.data.dto.response.ExecutionResource;
-import com.virnect.smic.server.data.dto.response.SearchDeviceModelAssembler;
-import com.virnect.smic.server.data.dto.response.StopDeviceModelAssembler;
+import com.virnect.smic.server.data.dto.response.assembler.SearchDeviceModelAssembler;
+import com.virnect.smic.server.data.dto.response.assembler.StopDeviceModelAssembler;
 import com.virnect.smic.server.data.error.ErrorCode;
-import com.virnect.smic.server.data.error.NoRunningExecutionException;
-import com.virnect.smic.server.data.error.NoSuchDeviceException;
+import com.virnect.smic.server.data.error.exception.NoRunningExecutionException;
+import com.virnect.smic.server.data.error.exception.NoSuchDeviceException;
 import com.virnect.smic.server.service.application.DeviceService;
 
 @RestController
@@ -41,7 +41,7 @@ public class DeviceRestController {
 
 	@DeleteMapping(value= "/all", produces = "application/hal+json")
 	@Operation(summary = "모든 장비 중지", description = "현재 기동 중인 작업의 모든 장비를 정지 상태로 설정합니다."
-		+ " 모든 장비가 정지 상태가 되면 데티어 연동 작업도 중지됩니다.")
+		+ " 모든 장비가 정지 상태가 되면 데이터 연동 작업도 중지됩니다.")
 	public ResponseEntity<ApiResponse<ExecutionResource>> releaseAllDevices(){
 		try {
 			ExecutionResource executionResource = deviceService.releaseAllDevices();

@@ -14,8 +14,8 @@ import com.virnect.smic.common.data.domain.ExecutionStatus;
 import com.virnect.smic.daemon.config.DaemonConfiguration;
 import com.virnect.smic.server.data.dao.DeviceRepository;
 import com.virnect.smic.server.data.dto.response.ExecutionResource;
-import com.virnect.smic.server.data.error.NoRunningDeviceException;
-import com.virnect.smic.server.data.error.NoSuchDeviceException;
+import com.virnect.smic.server.data.error.exception.NoRunningDeviceException;
+import com.virnect.smic.server.data.error.exception.NoSuchDeviceException;
 
 @Service
 public class DeviceService extends BaseService {

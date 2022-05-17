@@ -9,9 +9,5 @@ import org.springframework.stereotype.Service;
 @Service
 public interface ProducerManager {
 
-    default String getHost(){
-        return null;
-    }
-
     TaskletStatus runProducer(final int sendMessageCount, String topic, String value) throws IOException ;
 }

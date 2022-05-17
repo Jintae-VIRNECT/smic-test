@@ -17,13 +17,13 @@ import com.virnect.smic.daemon.http.HttpClientManager;
 public class AlertService {
 
 	private final Environment env;
-	private final HttpClientManager httpClientHanlder;
+	//private final HttpClientManager httpClientHanlder;
 	private final WebClient webClient;
 	private final String basicAuth;
 
 	public AlertService(Environment env, HttpClientManager httpClientHanlder) {
 		this.env = env;
-		this.httpClientHanlder = httpClientHanlder;
+		//this.httpClientHanlder = httpClientHanlder;
 		this.webClient = WebClient.builder()
 			.clientConnector(new JettyClientHttpConnector(httpClientHanlder.httpClient))
 			.baseUrl("http://"

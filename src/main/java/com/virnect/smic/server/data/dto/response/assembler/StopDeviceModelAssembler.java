@@ -1,4 +1,4 @@
-package com.virnect.smic.server.data.dto.response;
+package com.virnect.smic.server.data.dto.response.assembler;
 
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.virnect.smic.server.data.error.NoRunningExecutionException;
+import com.virnect.smic.server.data.dto.response.ExecutionResource;
+import com.virnect.smic.server.data.error.exception.NoRunningExecutionException;
 import com.virnect.smic.server.service.api.DeviceRestController;
 import com.virnect.smic.server.service.api.ExecutionRestController;
 

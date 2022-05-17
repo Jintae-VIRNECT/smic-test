@@ -27,19 +27,19 @@ public class DaemonConfiguration {
 	private final TagRepository tagRepository;
 	private final Environment env;
 
-	@Autowired
-	@Qualifier("tagList")
-    private List<TagDto> tags;
+	private final List<TagDto> tags;
 
-	private TopicManager topicManager;
+	private final SchedulingTaskLauncher schedulingTaskLauncher;
 
-	@Autowired(required = false)
-	private SchedulingTaskLauncher schedulingTaskLauncher;
-
-	public DaemonConfiguration(TagRepository tagRepository, Environment env) {
+	public DaemonConfiguration(
+		TagRepository tagRepository, Environment env, @Qualifier("tagList") List<TagDto> tags,
+		SchedulingTaskLauncher schedulingTaskLauncher
+	) {
 		this.tagRepository = tagRepository;
 		this.env = env;
-		
+
+		this.tags = tags;
+		this.schedulingTaskLauncher = schedulingTaskLauncher;
 	}
 
 	private OpcUaClient client;
@@ -70,6 +70,7 @@ public class DaemonConfiguration {
 	}
 
 	private void createTopics() throws Exception{
+		TopicManager topicManager;
 		if(env.getProperty("mq.queue-manager").equalsIgnoreCase("rabbitmq")){
 			topicManager = new RabbitMqQueueManager(tags, env);
 		}else{
@@ -81,10 +82,10 @@ public class DaemonConfiguration {
 
 	public void stopTaskExecutor(){
 		schedulingTaskLauncher.setClient(null);
-		schedulingTaskLauncher.setExecutionId(-1l);
+		schedulingTaskLauncher.setExecutionId(-1L);
 	}
 
 	public long getRunningExecutionId(){
-		return  (schedulingTaskLauncher.getClient()!=null?schedulingTaskLauncher.getExecutionId():-1l);
+		return  (schedulingTaskLauncher.getClient()!=null?schedulingTaskLauncher.getExecutionId():-1L);
 	}
 }

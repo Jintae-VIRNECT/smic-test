@@ -41,49 +41,22 @@ public class ReadTasklet {
 	private ThreadLocal<DataValue> valueHolder = new ThreadLocal<>();
 	private Tag tag;
 
-	@Autowired
-	@Qualifier("tagList")
 	private List<TagDto> tags;
 
-	@Autowired
-	@Qualifier("queueNameMap")
 	private ConcurrentHashMap<String, String> queueNameMap;
 
 	private final AtomicInteger counter = new AtomicInteger(0);
 	private final ProducerManager producerManager;
-	
-	public void initiate(String nodeId, OpcUaClient client){
-		nodeIdHolder.set(nodeId);
-		this.client = client;
-	}
 
-	public String readAndPublish(boolean isPub) {
-		counter.incrementAndGet();
-		try {
-			
-			valueHolder.set(client.readValue(2147483647, TimestampsToReturn.Both, new NodeId(2, nodeIdHolder.get())).get());
-			
-			if(valueHolder.get().getValue().getValue() != null) {
-				log.debug("{} {} {}", 
-					counter.get(),
-					nodeIdHolder.get().replaceAll(" ", ""), 
-					valueHolder.get().getValue().getValue().toString());
-				if(isPub)
-					producerManager.runProducer(1, nodeIdHolder.get().replaceAll(" ", ""), valueHolder.get().getValue().getValue().toString());
-				return valueHolder.get().getValue().getValue().toString();	
-			}else{
-				return "";
-			}
-			
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			log.error(" exception occurred at " +  tag.toString());
-			throw new IllegalStateException();
-		} finally{
-			nodeIdHolder.remove();
-			valueHolder.remove();
-		}
+	@Autowired
+	public ReadTasklet(
+		@Qualifier("tagList") List<TagDto> tags,
+		@Qualifier("queueNameMap") ConcurrentHashMap<String, String> queueNameMap,
+		ProducerManager producerManager
+	) {
+		this.tags = tags;
+		this.queueNameMap = queueNameMap;
+		this.producerManager = producerManager;
 	}
 
 	@TimeLogTrace

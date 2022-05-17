@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SchedulingTaskLauncher {
 
     private OpcUaClient client;
-	private long executionId = -1l;
+	private long executionId = -1L;
 
 	@Autowired
     private ReadTasklet tasklet;

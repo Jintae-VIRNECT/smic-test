@@ -25,17 +25,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.virnect.smic.common.data.domain.Execution;
-import com.virnect.smic.server.data.dto.response.SearchExecutionModelAssembler;
-import com.virnect.smic.server.data.dto.response.StartExecutionModelAssembler;
+import com.virnect.smic.server.data.dto.response.assembler.SearchExecutionModelAssembler;
+import com.virnect.smic.server.data.dto.response.assembler.StartExecutionModelAssembler;
 import com.virnect.smic.server.data.dto.response.SearchExecutionResource;
 import com.virnect.smic.server.data.dto.response.ExecutionResource;
 import com.virnect.smic.server.data.dto.response.ApiResponse;
-import com.virnect.smic.server.data.dto.response.StopExecutionModelAssembler;
-import com.virnect.smic.server.data.error.DuplicatedRunningDeviceException;
-import com.virnect.smic.server.data.error.DuplicatedRunningExecutionException;
+import com.virnect.smic.server.data.dto.response.assembler.StopExecutionModelAssembler;
+import com.virnect.smic.server.data.error.exception.DuplicatedRunningDeviceException;
+import com.virnect.smic.server.data.error.exception.DuplicatedRunningExecutionException;
 import com.virnect.smic.server.data.error.ErrorCode;
-import com.virnect.smic.server.data.error.NoRunningExecutionException;
-import com.virnect.smic.server.data.error.NoSuchExecutionException;
+import com.virnect.smic.server.data.error.exception.NoRunningExecutionException;
+import com.virnect.smic.server.data.error.exception.NoSuchExecutionException;
 import com.virnect.smic.server.service.application.ExecutionService;
 
 @Slf4j

@@ -29,19 +29,19 @@ import com.virnect.smic.server.data.dao.ExecutionRepository;
 import com.virnect.smic.server.data.dao.OrderRepository;
 import com.virnect.smic.server.data.dto.request.ReceivedOrderRequest;
 import com.virnect.smic.server.data.dto.request.smic.SendOrderRequest;
-import com.virnect.smic.server.data.dto.response.smic.PlanResponse;
-import com.virnect.smic.server.data.error.KioskLoginFailException;
-import com.virnect.smic.server.data.error.NoPlanCDValueException;
-import com.virnect.smic.server.data.error.NoRunningExecutionException;
-import com.virnect.smic.server.data.error.NoSuchDeviceException;
-import com.virnect.smic.server.data.error.NoSuchExecutionException;
-import com.virnect.smic.server.data.error.NoSuchOrderException;
-import com.virnect.smic.server.data.error.SmicUnknownHttpException;
+import com.virnect.smic.server.data.dto.response.PlanResponse;
+import com.virnect.smic.server.data.error.exception.KioskLoginFailException;
+import com.virnect.smic.server.data.error.exception.NoPlanCDValueException;
+import com.virnect.smic.server.data.error.exception.NoRunningExecutionException;
+import com.virnect.smic.server.data.error.exception.NoSuchDeviceException;
+import com.virnect.smic.server.data.error.exception.NoSuchExecutionException;
+import com.virnect.smic.server.data.error.exception.NoSuchOrderException;
+import com.virnect.smic.server.data.error.exception.SmicUnknownHttpException;
 
 @Service
 public class OrderService {
 	private final Environment env;
-	private final HttpClientManager httpClientHanlder;
+	//private final HttpClientManager httpClientHanlder;
 	private final WebClient webClient;
 	private final ModelMapper modelMapper;
 	private final OrderRepository orderRepository;
@@ -56,7 +56,7 @@ public class OrderService {
 		, ExecutionRepository executionRepository
 		, DeviceRepository deviceRepository) {
 		this.env = env;
-		this.httpClientHanlder = httpClientHanlder;
+	//	this.httpClientHanlder = httpClientHanlder;
 		this.webClient =  WebClient.builder()
 			.clientConnector(new JettyClientHttpConnector(httpClientHanlder.httpClient))
 			.baseUrl("http://"+ env.getProperty("smic.kiosk.host") + ":" + env.getProperty("smic.kiosk.port"))

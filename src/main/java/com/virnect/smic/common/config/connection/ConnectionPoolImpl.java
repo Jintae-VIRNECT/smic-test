@@ -92,11 +92,6 @@ public class ConnectionPoolImpl implements ConnectionPool, InitializingBean {
         return removed;
     }
 
-    // public boolean releaseConnection(OpcUaClient connection) {
-    //     connectionPool.offer(Optional.ofNullable(connection));
-    //     return usedConnection.remove(connection);
-    // }
-
     public void shutdown() {
         usedConnection.forEach(this::releaseConnection);
         for ( Optional<OpcUaClient> client : connectionPool) {

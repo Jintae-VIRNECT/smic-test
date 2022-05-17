@@ -1,4 +1,4 @@
-package com.virnect.smic.server.data.error;
+package com.virnect.smic.server.data.error.exception;
 
 import org.springframework.http.HttpStatus;
 

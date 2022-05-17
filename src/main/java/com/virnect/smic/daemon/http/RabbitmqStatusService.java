@@ -19,7 +19,7 @@ import com.virnect.smic.common.data.dto.RabbitmqChannelResponse;
 public class RabbitmqStatusService {
 
 	private final Environment env;
-	private final HttpClientManager httpClientHanlder;
+	//private final HttpClientManager httpClientHanlder;
 	private final WebClient webClient;
 	private final ModelMapper modelMapper;
 
@@ -28,7 +28,7 @@ public class RabbitmqStatusService {
 		ModelMapper modelMapper
 	) {
 		this.env = env;
-		this.httpClientHanlder = httpClientHanlder;
+		//this.httpClientHanlder = httpClientHanlder;
 		this.modelMapper = modelMapper;
 		this.webClient = WebClient.builder()
 			.clientConnector(new JettyClientHttpConnector(httpClientHanlder.httpClient))

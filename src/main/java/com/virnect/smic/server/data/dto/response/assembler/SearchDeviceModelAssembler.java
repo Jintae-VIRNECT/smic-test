@@ -1,4 +1,4 @@
-package com.virnect.smic.server.data.dto.response;
+package com.virnect.smic.server.data.dto.response.assembler;
 
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -6,7 +6,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import java.util.NoSuchElementException;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +13,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import com.virnect.smic.common.data.domain.Device;
-import com.virnect.smic.server.data.error.NoRunningExecutionException;
-import com.virnect.smic.server.data.error.NoSuchDeviceException;
+import com.virnect.smic.server.data.dto.response.DeviceResource;
+import com.virnect.smic.server.data.dto.response.ExecutionResource;
+import com.virnect.smic.server.data.error.exception.NoSuchDeviceException;
 import com.virnect.smic.server.service.api.DeviceRestController;
 import com.virnect.smic.server.service.api.ExecutionRestController;
 

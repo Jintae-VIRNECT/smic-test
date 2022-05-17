@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -164,7 +165,7 @@ class RabbitMqQueueManagerTest {
 		Channel channel = connection.createChannel();
 
 		DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-			String message = new String(delivery.getBody(), "UTF-8");
+			String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
 			System.out.println(" [x] Received '" + message + "'");
 		};
 

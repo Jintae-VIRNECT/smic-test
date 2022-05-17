@@ -23,15 +23,15 @@ import lombok.extern.slf4j.Slf4j;
 import com.virnect.smic.common.data.domain.Order;
 import com.virnect.smic.server.data.dto.request.ReceivedOrderRequest;
 import com.virnect.smic.server.data.dto.response.ApiResponse;
-import com.virnect.smic.server.data.dto.response.OrderModelAssembler;
+import com.virnect.smic.server.data.dto.response.assembler.OrderModelAssembler;
 import com.virnect.smic.server.data.dto.response.OrderResource;
 import com.virnect.smic.server.data.error.ErrorCode;
-import com.virnect.smic.server.data.error.KioskLoginFailException;
-import com.virnect.smic.server.data.error.NoPlanCDValueException;
-import com.virnect.smic.server.data.error.NoRunningExecutionException;
-import com.virnect.smic.server.data.error.NoSuchExecutionException;
-import com.virnect.smic.server.data.error.NoSuchOrderException;
-import com.virnect.smic.server.data.error.SmicUnknownHttpException;
+import com.virnect.smic.server.data.error.exception.KioskLoginFailException;
+import com.virnect.smic.server.data.error.exception.NoPlanCDValueException;
+import com.virnect.smic.server.data.error.exception.NoRunningExecutionException;
+import com.virnect.smic.server.data.error.exception.NoSuchExecutionException;
+import com.virnect.smic.server.data.error.exception.NoSuchOrderException;
+import com.virnect.smic.server.data.error.exception.SmicUnknownHttpException;
 import com.virnect.smic.server.service.application.OrderService;
 
 @Slf4j

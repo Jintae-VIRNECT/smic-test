@@ -20,11 +20,14 @@ import com.virnect.smic.common.config.connection.NoConnectionAvailableException;
 @Order(3)
 @Component
 public class OpcUaConnectionAspect {
-	@Autowired
-	ConnectionPoolImpl pool;
+	final ConnectionPoolImpl pool;
 
 	OpcUaClient client;
 	private final int MAX_RETRY = 4;
+
+	public OpcUaConnectionAspect(ConnectionPoolImpl pool) {
+		this.pool = pool;
+	}
 
 	@Around("@annotation(com.virnect.smic.common.config.annotation.OpcUaConnection)")
 	public Object doConnection(ProceedingJoinPoint joinPoint) throws Throwable {
