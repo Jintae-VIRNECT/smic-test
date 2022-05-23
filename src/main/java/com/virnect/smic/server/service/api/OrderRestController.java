@@ -87,7 +87,7 @@ public class OrderRestController {
 		} catch(SmicUnknownHttpException suhe){
 			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ApiResponse<OrderResource>(
 				assembler.withoutModel(suhe),
-				ErrorCode.ERR_EXTERNAL_ERROR_LOGIN_FAIL
+				ErrorCode.ERR_EXTERNAL_ERROR_UNKNOWN
 			));
 		}catch (Exception e){
 			e.printStackTrace();

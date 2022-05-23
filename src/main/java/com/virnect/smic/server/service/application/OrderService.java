@@ -41,7 +41,6 @@ import com.virnect.smic.server.data.error.exception.SmicUnknownHttpException;
 @Service
 public class OrderService {
 	private final Environment env;
-	//private final HttpClientManager httpClientHanlder;
 	private final WebClient webClient;
 	private final ModelMapper modelMapper;
 	private final OrderRepository orderRepository;
@@ -56,7 +55,6 @@ public class OrderService {
 		, ExecutionRepository executionRepository
 		, DeviceRepository deviceRepository) {
 		this.env = env;
-	//	this.httpClientHanlder = httpClientHanlder;
 		this.webClient =  WebClient.builder()
 			.clientConnector(new JettyClientHttpConnector(httpClientHanlder.httpClient))
 			.baseUrl("http://"+ env.getProperty("smic.kiosk.host") + ":" + env.getProperty("smic.kiosk.port"))
@@ -138,7 +136,7 @@ public class OrderService {
 		return !response.getStatusCode().isError();
 	}
 
-	private Optional<String> getPlanCDValue() {
+	Optional<String> getPlanCDValue() {
 		String body = "{\"planCat\":\"0\"}";
 
 		PlanResponse response =  webClient.post()

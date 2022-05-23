@@ -24,10 +24,10 @@ spring:
     show-sql: false
   hateoas:
     use-hal-as-default-json-media-type: false
-  boot:
-    admin:
-      client:
-        url: http://localhost:8090
+#  boot:
+#    admin:
+#      client:
+#        url: http://localhost:8090
 decorator:
   datasource:
     p6spy:

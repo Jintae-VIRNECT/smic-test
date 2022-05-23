@@ -66,9 +66,19 @@ public class HttpClientManager {
 			sbResponse.append("Response Body:\n\t" + bufferAsString);
 		}));
 
-		inboundRequest.onRequestSuccess(request -> log.debug(sbRequest.toString()));
-		inboundRequest.onResponseSuccess(response -> log.debug(sbResponse.toString()));
+		inboundRequest.onRequestSuccess(request
+			-> logByCustomizedRule(request.getURI().toString(), sbRequest.toString()));
+		inboundRequest.onResponseSuccess(response
+			-> logByCustomizedRule(response.getRequest().getURI().toString(), sbResponse.toString()));
 
 		return inboundRequest;
+	}
+
+	private void logByCustomizedRule(String uri, String content){
+		if ((uri.contains("GetAlertSummary"))) {
+			log.debug(content);
+		} else {
+			log.info(content);
+		}
 	}
 }

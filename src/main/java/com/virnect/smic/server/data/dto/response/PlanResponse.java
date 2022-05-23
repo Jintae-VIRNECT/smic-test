@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.gson.JsonObject;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
