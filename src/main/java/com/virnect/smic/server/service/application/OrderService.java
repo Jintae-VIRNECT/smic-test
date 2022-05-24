@@ -7,7 +7,9 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
@@ -47,17 +49,23 @@ public class OrderService {
 	private final ExecutionRepository executionRepository;
 	private final DeviceRepository deviceRepository;
 
+	@Qualifier("httpSmicKiosk")
+	private String baseUrl;
+
 	public OrderService(
 		Environment env
 		, HttpClientManager httpClientHanlder
 		, ModelMapper modelMapper
-	    , OrderRepository orderRepository
+		, OrderRepository orderRepository
 		, ExecutionRepository executionRepository
-		, DeviceRepository deviceRepository) {
+		, DeviceRepository deviceRepository
+		, String baseUrl
+	) {
 		this.env = env;
 		this.webClient =  WebClient.builder()
 			.clientConnector(new JettyClientHttpConnector(httpClientHanlder.httpClient))
-			.baseUrl("http://"+ env.getProperty("smic.kiosk.host") + ":" + env.getProperty("smic.kiosk.port"))
+			//.baseUrl("http://"+ env.getProperty("smic.kiosk.host") + ":" + env.getProperty("smic.kiosk.port"))
+			.baseUrl(baseUrl)
 			.build();
 		this.modelMapper = modelMapper;
 		this.orderRepository = orderRepository;
@@ -149,7 +157,7 @@ public class OrderService {
 			.onErrorMap(
 				throwable -> {
 					throwable.printStackTrace();
-					return throwable;
+					return new SmicUnknownHttpException(HttpStatus.SERVICE_UNAVAILABLE, throwable.getMessage());
 				})
 			.block();
 
@@ -184,7 +192,7 @@ public class OrderService {
 			.onErrorMap(
 				throwable -> {
 					throwable.printStackTrace();
-					return throwable;
+					return new SmicUnknownHttpException(HttpStatus.SERVICE_UNAVAILABLE, throwable.getMessage());
 				})
 			.block();
 	}
