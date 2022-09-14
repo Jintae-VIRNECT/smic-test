@@ -11,7 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.virnect.smic.common.data.domain.Device;
 import com.virnect.smic.common.data.domain.ExecutionStatus;
 
 @Getter @Setter
@@ -29,6 +28,6 @@ public class ExecutionResource extends RepresentationModel<ExecutionResource> {
 	@Schema(name="execution updated date", description = "작업 갱신 일시", example = "2022-04-12 17:11:36")
 	private LocalDateTime executionUpdatedDate;
 
-	@Schema(name="devices",description = "장비 정보")
-	private List<Device> devices;
+	@Schema(name="devices",description = "장비 정보 목록")
+	private List<DeviceResource> devices;
 }

@@ -33,13 +33,13 @@ public class Execution extends  BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	private ExecutionStatus executionStatus;
 
-	@JsonIgnore
-	@OneToMany(mappedBy = "execution")
-	private List<Order> orders;
-
-	@JsonIgnore
-	@OneToMany(mappedBy = "execution")
-	private List<Device> devices;
+	// @JsonIgnore
+	// @OneToMany(mappedBy = "execution")
+	// private List<Order> orders;
+	//
+	// @JsonIgnore
+	// @OneToMany(mappedBy = "execution")
+	// private List<Device> devices;
 
 	public Execution() {
 		executionStatus = ExecutionStatus.STARTED;
@@ -50,8 +50,8 @@ public class Execution extends  BaseTimeEntity {
 		return "Execution{" +
 			"id=" + id +
 			", executionStatus=" + executionStatus +
-			", orders=" + orders +
-			", devices=" + devices +
+			//", orders=" + orders +
+			//", devices=" + devices +
 			'}';
 	}
 }

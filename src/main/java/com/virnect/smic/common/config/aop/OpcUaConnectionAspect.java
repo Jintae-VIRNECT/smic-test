@@ -35,8 +35,6 @@ public class OpcUaConnectionAspect {
 		Object[] args = joinPoint.getArgs();
 		log.info("[befoer connection] {} args={}", joinPoint.getSignature(), args );
 
-		//ConnectionPoolImpl pool = ConnectionPoolImpl.getInstance();
-
 		AtomicInteger count = new AtomicInteger(0);
 		while(count.get()< MAX_RETRY){
 			try{

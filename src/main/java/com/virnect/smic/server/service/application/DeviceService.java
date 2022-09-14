@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import javax.annotation.PreDestroy;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,15 +28,23 @@ public class DeviceService extends BaseService {
 
 	private final ExecutionService executionService;
 
+	private final ModelMapper modelMapper;
+
+	private final Environment env;
+
 	public DeviceService(
 		DeviceRepository deviceRepository,
 		DaemonConfiguration daemonConfiguration,
-		ExecutionService executionService
+		ExecutionService executionService,
+		ModelMapper modelMapper,
+		Environment env
 	) {
-		super(daemonConfiguration);
+		super(daemonConfiguration, modelMapper);
 		this.deviceRepository = deviceRepository;
 		this.daemonConfiguration = daemonConfiguration;
 		this.executionService = executionService;
+		this.modelMapper = modelMapper;
+		this.env = env;
 	}
 
 	public ExecutionResource releaseAllDevices(){
@@ -77,6 +87,13 @@ public class DeviceService extends BaseService {
 
 	List<Device> getAllRunningDevices(long executionId) {
 		return deviceRepository.findByExecutionIdAndExecutionStatus(executionId, ExecutionStatus.STARTED);
+	}
+
+	int getDeviceSequenceNumber(long executionId) {
+		int numberOfRunningDevices =
+			deviceRepository.findByExecutionIdAndExecutionStatus(executionId, ExecutionStatus.STARTED).size();
+		int numberOfMaxConsumers = Integer.parseInt(env.getProperty("mq.rabbitmq.num-consumer"));
+		return (numberOfRunningDevices % numberOfMaxConsumers) + 1;
 	}
 
 	List<Device> getDevicesInExecution(long executionId){

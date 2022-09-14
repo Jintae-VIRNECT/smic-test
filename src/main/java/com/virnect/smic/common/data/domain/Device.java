@@ -36,15 +36,18 @@ public class Device extends BaseTimeEntity{
 	@JoinColumn(name = "execution_id")
 	private Execution execution;
 
-	@JsonIgnore
-	@OneToMany(mappedBy = "device")
-	private List<Order> orders;
+	//@JsonIgnore
+	//@OneToMany(mappedBy = "device")
+	//private List<Order> orders;
 
 	private String macAddress;
 
-	public Device(String macAddress, Execution execution){
+	private int sequenceNumber;
+
+	public Device(String macAddress, Execution execution, int sequenceNumber){
 		this.macAddress = macAddress;
 		this.execution = execution;
+		this.sequenceNumber = sequenceNumber;
 		this.executionStatus = ExecutionStatus.STARTED;
 	}
 

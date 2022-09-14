@@ -23,6 +23,7 @@ import com.virnect.smic.common.data.domain.ExecutionStatus;
 import com.virnect.smic.daemon.config.DaemonConfiguration;
 import com.virnect.smic.server.data.dao.DeviceRepository;
 import com.virnect.smic.server.data.dao.ExecutionRepository;
+import com.virnect.smic.server.data.dto.response.DeviceResource;
 import com.virnect.smic.server.data.dto.response.ExecutionResource;
 import com.virnect.smic.server.data.error.exception.DuplicatedRunningDeviceException;
 import com.virnect.smic.server.data.error.exception.DuplicatedRunningExecutionException;
@@ -78,7 +79,7 @@ class ExecutionServiceTest {
 			DuplicatedRunningExecutionException execption = assertThrows(DuplicatedRunningExecutionException.class, ()->{
 				executionService.getStartExecutionResult("temp123");
 			});
-			List<Device> devices = execption.getExecutionResource().getDevices();
+			List<DeviceResource> devices = execption.getExecutionResource().getDevices();
 			assertTrue(devices.size()==1);
 			devices.forEach(d->assertNotNull(d.getId()));
 		}
@@ -124,7 +125,7 @@ class ExecutionServiceTest {
 		void get_StartExecutionResult_when_both_running_execution_and_device_exist() {
 
 			// given
-			Device device = new Device("temp123", executionStarted);
+			Device device = new Device("temp123", executionStarted, 1);
 			deviceRepository.save(device);
 
 			// when, then
@@ -147,9 +148,9 @@ class ExecutionServiceTest {
 			Execution execution = new Execution();
 			execution.setId(222222L);
 			runningExecution = executionRepository.save(execution);
-			Device device = new Device("temp123", runningExecution);
+			Device device = new Device("temp123", runningExecution, 1);
 			runningDevice = deviceRepository.save(device);
-			deviceRepository.save(new Device("temp456", runningExecution));
+			deviceRepository.save(new Device("temp456", runningExecution, 2));
 
 			// when
 			ExecutionResource result
@@ -172,10 +173,10 @@ class ExecutionServiceTest {
 			Execution execution = new Execution();
 			execution.setId(222222L);
 			runningExecution = executionRepository.save(execution);
-			Device stoppedDevice = new Device("temp456", runningExecution);
+			Device stoppedDevice = new Device("temp456", runningExecution, 1);
 			stoppedDevice.setExecutionStatus(ExecutionStatus.STOPPED);
 			deviceRepository.save(stoppedDevice);
-			runningDevice = deviceRepository.save(new Device("temp123", runningExecution));
+			runningDevice = deviceRepository.save(new Device("temp123", runningExecution, 2));
 
 			// when
 			ExecutionResource result
@@ -198,7 +199,7 @@ class ExecutionServiceTest {
 			Execution execution = new Execution();
 			execution.setId(222222L);
 			runningExecution = executionRepository.save(execution);
-			Device stoppedDevice = new Device("temp456", runningExecution);
+			Device stoppedDevice = new Device("temp456", runningExecution, 1);
 			stoppedDevice.setExecutionStatus(ExecutionStatus.STOPPED);
 			Device device = deviceRepository.save(stoppedDevice);
 

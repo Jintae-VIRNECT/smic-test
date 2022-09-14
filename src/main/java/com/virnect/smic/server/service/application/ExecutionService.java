@@ -49,7 +49,7 @@ public class ExecutionService extends BaseService {
 		ModelMapper modelMapper,
 		@Lazy DeviceService deviceService
 	) {
-		super(daemonConfiguration);
+		super(daemonConfiguration,modelMapper);
 		this.executionRepository = executionRepository;
 		this.deviceRepository = deviceRepository;
 		this.modelMapper = modelMapper;
@@ -61,6 +61,7 @@ public class ExecutionService extends BaseService {
 
 		Optional<Execution> latestExecution = getLatestExecutionInfo();
 
+		// execution이 없거나, STARTED 상태가 아닌 경우
 		if(checkLatestExecutionStatusNotStarted(latestExecution)){
 			Execution registeredExecution = registerExecution();
 			startDaemon(registeredExecution.getId());
@@ -107,7 +108,10 @@ public class ExecutionService extends BaseService {
 
 	@Transactional
 	Device registerDevice(String macAddress, Execution execution){
-		return deviceRepository.save(new Device(macAddress, execution));
+
+		int sequenceNumber = deviceService.getDeviceSequenceNumber(execution.getId());
+
+		return deviceRepository.save(new Device(macAddress, execution, sequenceNumber));
 	}
 
 	public ExecutionResource getStopExecutionResult (long executionId, long deviceId) {

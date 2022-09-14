@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
+import org.springframework.core.env.Environment;
 
 import com.virnect.smic.common.data.domain.Device;
 import com.virnect.smic.common.data.domain.Execution;
@@ -31,6 +33,12 @@ class DeviceServiceTest {
 	@Mock
 	ExecutionService executionService;
 
+	@Mock
+	ModelMapper modelMapper;
+
+	@Mock
+	Environment environment;
+
 	DeviceService deviceService;
 
 	static List<Device> devices;
@@ -42,12 +50,12 @@ class DeviceServiceTest {
 		execution.setId(1L);
 
 		devices =
-			List.of(new Device("test1", execution), new Device("test2", execution));
+			List.of(new Device("test1", execution, 1), new Device("test2", execution, 2));
 	}
 
 	@BeforeEach
 	void initService(){
-		deviceService = new DeviceService(deviceRepository, daemonConfiguration, executionService);
+		deviceService = new DeviceService(deviceRepository, daemonConfiguration, executionService,modelMapper, environment);
 	}
 
 	@Test
@@ -68,9 +76,9 @@ class DeviceServiceTest {
 		stopExecution.setId(1L);
 		stopExecution.setExecutionStatus(ExecutionStatus.STOPPED);
 
-		Device device = new Device("a", startExecution);
+		Device device = new Device("a", startExecution, 1);
 		when(deviceRepository.save(device))
-			.thenReturn(new Device("a", stopExecution));
+			.thenReturn(new Device("a", stopExecution, 1));
 		List<Device> devices = deviceService.updateAllDeviceStatusStopped(
 			List.of(device));
 

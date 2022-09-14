@@ -3,6 +3,7 @@ package com.virnect.smic.daemon.mq.rabbitmq;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.IntStream;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
@@ -27,11 +28,14 @@ public class RabbitMqProducerManager implements ProducerManager {
     private static Environment env;
     private static  AmqpTemplate template;
 
+    private int numberOfConsumers = 3;
+
     @Autowired
     public RabbitMqProducerManager(Environment env){
         this.env = env;
         try {
-            producer = createRabbitMqChannel();
+            this.producer = createRabbitMqChannel();
+            this.numberOfConsumers = Integer.parseInt(env.getProperty("mq.rabbitmq.num-consumer"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -49,14 +53,16 @@ public class RabbitMqProducerManager implements ProducerManager {
     }
 
 
-    public TaskletStatus runProducer(int i, String queueName, String value) {
-        try {
-            producer.basicPublish("amq.topic", queueName, true, null, value.getBytes(StandardCharsets.UTF_8));
-            return TaskletStatus.COMPLETED;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return TaskletStatus.FAILED;
-        }
+    public TaskletStatus runProducer(int _i, String queueName, String value) {
+        IntStream.range(1, numberOfConsumers+1).forEach(i->{
+            String queueNameWithNumber = String.format("%s.%d",queueName, i);
+            try {
+                producer.basicPublish("amq.topic", queueNameWithNumber, true, null, value.getBytes(StandardCharsets.UTF_8));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        return TaskletStatus.COMPLETED;
     }
 
 

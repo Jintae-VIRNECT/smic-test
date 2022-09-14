@@ -118,7 +118,7 @@ class OrderServiceTest {
 		//given
 		Execution execution = new Execution();
 		execution = executionRepository.save(execution);
-		Device device = new Device("temp123", execution);
+		Device device = new Device("temp123", execution, 1);
 		device = deviceRepository.save(device);
 
 		orderRequest.setExecutionId(execution.getId()+1);
@@ -136,7 +136,7 @@ class OrderServiceTest {
 		Execution execution = new Execution();
 		execution.setExecutionStatus(ExecutionStatus.STOPPED);
 		execution = executionRepository.save(execution);
-		Device device = new Device("temp123", execution);
+		Device device = new Device("temp123", execution, 1);
 		device = deviceRepository.save(device);
 
 		orderRequest.setExecutionId(execution.getId());
@@ -156,7 +156,7 @@ class OrderServiceTest {
 
 		Execution execution = new Execution();
 		execution = executionRepository.save(execution);
-		Device device = new Device("temp123", execution);
+		Device device = new Device("temp123", execution, 1);
 		device = deviceRepository.save(device);
 
 		orderRequest.setExecutionId(execution.getId());
@@ -188,7 +188,7 @@ class OrderServiceTest {
 
 		Execution execution = new Execution();
 		execution = executionRepository.save(execution);
-		Device device = new Device("temp123", execution);
+		Device device = new Device("temp123", execution, 1);
 		device = deviceRepository.save(device);
 
 		orderRequest.setExecutionId(execution.getId());
@@ -229,7 +229,7 @@ class OrderServiceTest {
 
 		Execution execution = new Execution();
 		execution = executionRepository.save(execution);
-		Device device = new Device("temp123", execution);
+		Device device = new Device("temp123", execution, 1);
 		device = deviceRepository.save(device);
 
 		orderRequest.setExecutionId(execution.getId());
@@ -276,7 +276,7 @@ class OrderServiceTest {
 
 		Execution execution = new Execution();
 		execution = executionRepository.save(execution);
-		Device device = new Device("temp123", execution);
+		Device device = new Device("temp123", execution, 1);
 		device = deviceRepository.save(device);
 
 		orderRequest.setExecutionId(execution.getId());

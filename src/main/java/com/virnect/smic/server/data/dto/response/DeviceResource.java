@@ -20,7 +20,7 @@ import com.virnect.smic.common.data.domain.ExecutionStatus;
 @NoArgsConstructor
 @Schema(name="deviceResponse", description = "장비 응답")
 public class DeviceResource extends RepresentationModel<DeviceResource> {
-	@Schema(name="id", description = "주문 id", example = "1", type = "long")
+	@Schema(name="id", description = "장비 id", example = "1", type = "long")
 	private Long id;
 	@Schema(name="execution status", description = "작업 상태", example = "STARTED", type="enum")
 	private ExecutionStatus executionStatus;
@@ -28,6 +28,8 @@ public class DeviceResource extends RepresentationModel<DeviceResource> {
 	private String macAddress;
 	@Schema(name="execution id", description = "작업 id", example = "1", type = "long")
 	private Long executionId;
+	@Schema(name="sequence number", description = "큐 할당 번호", example = "1", type = "int")
+	private int sequenceNumber;
 
 	@Schema(name="createdDate", description = "생성 일시", example="2022-04-12 16:11:36", type="datetime")
 	private LocalDateTime createdDate;

@@ -31,6 +31,7 @@ public class ApiResponse<T> {
     @Schema(name="message", description = "API 처리 결과에 대한 메시지", type = "string", example = "success")
     String message;
 
+
     public ApiResponse(T data) {
         this.data = data;
         this.code = ErrorCode.ERR_SUCCESS.getCode();

@@ -33,9 +33,7 @@ public class ModelLine {
 
 	private String description;
 
-	@OneToMany(mappedBy = "modelLine")//, cascade = CascadeType.ALL)
-	private List<Tag> tags = new ArrayList<>();
+	// @OneToMany(mappedBy = "modelLine")//, cascade = CascadeType.ALL)
+	// private List<Tag> tags = new ArrayList<>();
 
-	// @OneToOne(mappedBy = "model_line")
-	// private TaskExecution taskExecution;
 }
