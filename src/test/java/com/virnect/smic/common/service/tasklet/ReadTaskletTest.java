@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -45,43 +46,25 @@ class ReadTaskletTest{
 		int numberOfConsumers = Integer.parseInt(env.getProperty("mq.rabbitmq.num-consumer"));
 		String queueName = "010_AGV_KIT.ANIMATION.RUNNING.KIT";
 		String pubValue = String.valueOf((Math.random()*100)+1);
-		ConcurrentHashMap<String, String> result = new ConcurrentHashMap<>();
-		result.put(queueName, pubValue);
-		System.out.println("pub value: " + pubValue);
-		readTasklet.publishAndLogAsync(result, "TEST001");
+		publish(queueName, pubValue);
 
-		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost("localhost");
-		Connection connection = factory.newConnection();
-		Channel channel = connection.createChannel();
-		channel.queueDeclare(queueName, false, false, false, null);
+		Channel channel =getChannel(queueName);
 
-		System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
-
-		Logger taskletLogger = (Logger) LoggerFactory.getLogger(ReadTaskletTest.class);
 		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
 		listAppender.start();
+		Logger taskletLogger = (Logger) LoggerFactory.getLogger(ReadTaskletTest.class);
 		taskletLogger.addAppender(listAppender);
 
-		Consumer consumer = new DefaultConsumer(channel) {
-			@Override
-			public void handleDelivery(String consumerTag, Envelope envelope,
-				AMQP.BasicProperties properties, byte[] body) throws IOException {
-				String message = new String(body, "UTF-8");
-				log.info( Thread.currentThread().getName() + " [x] Received '" + message + "'");
-				//Assert.assertEquals(pubValue, message);
-			}
-		};
+		Consumer consumer = getConsumer(channel);
 
+		// when
 		ExecutorService executorService = Executors.newFixedThreadPool(numberOfConsumers);
 		CompletableFuture[] futures = new CompletableFuture[numberOfConsumers];
 		for(int i=0; i<numberOfConsumers; i++){
 			String queueNameWithNumber = String.format("%s.%d",queueName, i+1);
-
 			futures[i] =  CompletableFuture.runAsync(()->{
 
 				try {
-					// when
 					channel.basicConsume(queueNameWithNumber, false, consumer);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -102,5 +85,38 @@ class ReadTaskletTest{
 		// then
 		Assert.assertEquals(numberOfConsumers, collect.size());
 
+	}
+
+	@NotNull
+	private DefaultConsumer getConsumer(Channel channel) {
+		return new DefaultConsumer(channel) {
+			@Override
+			public void handleDelivery(
+				String consumerTag, Envelope envelope,
+				AMQP.BasicProperties properties, byte[] body
+			) throws IOException {
+				String message = new String(body, "UTF-8");
+				log.info(Thread.currentThread().getName() + " [x] Received '" + message + "'");
+			}
+		};
+	}
+
+	private void publish(String queueName, String pubValue){
+		ConcurrentHashMap<String, String> result = new ConcurrentHashMap<>();
+		result.put(queueName, pubValue);
+		System.out.println("pub value: " + pubValue);
+		readTasklet.publishAndLogAsync(result, "TEST001");
+	}
+
+	private Channel getChannel(String queueName) throws IOException, TimeoutException {
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setHost("localhost");
+		Connection connection = factory.newConnection();
+		Channel channel = connection.createChannel();
+		channel.queueDeclare(queueName, false, false, false, null);
+
+		System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+
+		return  channel;
 	}
 }

@@ -39,6 +39,7 @@ public class RabbitMqQueueManager implements TopicManager{
         factory.setPort(Integer.parseInt(env.getProperty("mq.rabbitmq.port")));
 
         int numberOfConsumers = Integer.parseInt(env.getProperty("mq.rabbitmq.num-consumer"));
+        int messageTtl = Integer.parseInt(env.getProperty("mq.rabbitmq.expiration-ms"));
 
         try (Connection connection = factory.newConnection();
             Channel channel = connection.createChannel()) {
@@ -50,6 +51,7 @@ public class RabbitMqQueueManager implements TopicManager{
                         channel.exchangeDeclare("amq.topic", "topic", true, false, null);
                         Map<String, Object> args = new HashMap<String, Object>();
                         args.put("max-length", 1);
+                        args.put("x-message-ttl", messageTtl);
                         channel.queueDeclare(queueName, false, false, false, args);
                         channel.queueBind(queueName, "amq.topic", queueName);
                     } catch (IOException e) {

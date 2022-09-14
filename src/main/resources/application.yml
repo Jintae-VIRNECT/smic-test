@@ -86,3 +86,4 @@ mq:
     management-port: 15672
     channel-uri: api/channels
     num-consumer: 5
+    expiration-ms: 5000

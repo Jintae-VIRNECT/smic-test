@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.virnect.smic.common.data.domain.TaskletStatus;
@@ -30,15 +31,21 @@ public class RabbitMqProducerManager implements ProducerManager {
 
     private int numberOfConsumers = 3;
 
+    private AMQP.BasicProperties properties;
+
     @Autowired
     public RabbitMqProducerManager(Environment env){
         this.env = env;
         try {
-            this.producer = createRabbitMqChannel();
+            producer = createRabbitMqChannel();
             this.numberOfConsumers = Integer.parseInt(env.getProperty("mq.rabbitmq.num-consumer"));
         } catch (Exception e) {
             e.printStackTrace();
         }
+        String expirationMs = env.getProperty("mq.rabbitmq.expiration-ms");
+        properties = new AMQP.BasicProperties.Builder()
+            .expiration(expirationMs)
+            .build();
     }
 
     private static Channel createRabbitMqChannel() throws IOException, TimeoutException {
@@ -57,7 +64,7 @@ public class RabbitMqProducerManager implements ProducerManager {
         IntStream.range(1, numberOfConsumers+1).forEach(i->{
             String queueNameWithNumber = String.format("%s.%d",queueName, i);
             try {
-                producer.basicPublish("amq.topic", queueNameWithNumber, true, null, value.getBytes(StandardCharsets.UTF_8));
+                producer.basicPublish("amq.topic", queueNameWithNumber, false, properties, value.getBytes(StandardCharsets.UTF_8));
             } catch (Exception e) {
                 e.printStackTrace();
             }
