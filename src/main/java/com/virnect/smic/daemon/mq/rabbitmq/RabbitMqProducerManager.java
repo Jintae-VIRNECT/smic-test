@@ -31,7 +31,7 @@ public class RabbitMqProducerManager implements ProducerManager {
 
     private int numberOfConsumers = 3;
 
-    private AMQP.BasicProperties properties;
+    private AMQP.BasicProperties properties = null;
 
     @Autowired
     public RabbitMqProducerManager(Environment env){
@@ -42,10 +42,10 @@ public class RabbitMqProducerManager implements ProducerManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String expirationMs = env.getProperty("mq.rabbitmq.expiration-ms");
-        properties = new AMQP.BasicProperties.Builder()
-            .expiration(expirationMs)
-            .build();
+        // String expirationMs = env.getProperty("mq.rabbitmq.expiration-ms");
+        // properties = new AMQP.BasicProperties.Builder()
+        //     .expiration(expirationMs)
+        //     .build();
     }
 
     private static Channel createRabbitMqChannel() throws IOException, TimeoutException {

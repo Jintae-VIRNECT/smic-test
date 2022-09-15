@@ -1,7 +1,9 @@
 package com.virnect.smic.common.service.tasklet;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -87,6 +89,30 @@ class ReadTaskletTest{
 
 	}
 
+	@Test
+	void concurrentConsumerTestWithDifferentQueue2() throws IOException, TimeoutException, InterruptedException {
+		// given
+		String queueName1 = "020_KIT_ZONE.EQUIPMENT.ENERGY.VOLTAGE.1";
+		String queueName2 = "020_KIT_ZONE.EQUIPMENT.ENERGY.VOLTAGE.2";
+
+		Channel channel1 =getChannel(queueName1);
+		Channel channel2 =getChannel(queueName2);
+
+		Consumer consumer1 = getConsumer(channel1);
+		Consumer consumer2 = getConsumer(channel2);
+
+		while(true){
+
+				try {
+					channel1.basicConsume(queueName1, true, consumer1);
+					channel2.basicConsume(queueName2, true, consumer2);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+		}
+
+	}
+
 	@NotNull
 	private DefaultConsumer getConsumer(Channel channel) {
 		return new DefaultConsumer(channel) {
@@ -113,7 +139,10 @@ class ReadTaskletTest{
 		factory.setHost("localhost");
 		Connection connection = factory.newConnection();
 		Channel channel = connection.createChannel();
-		channel.queueDeclare(queueName, false, false, false, null);
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("x-max-length", 1);
+		//args.put("x-message-ttl", 5000);
+		channel.queueDeclare(queueName, false, false, false, args);
 
 		System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
