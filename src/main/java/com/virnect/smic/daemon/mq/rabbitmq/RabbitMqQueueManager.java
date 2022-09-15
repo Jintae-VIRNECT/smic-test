@@ -50,7 +50,7 @@ public class RabbitMqQueueManager implements TopicManager{
                     try {
                         channel.exchangeDeclare("amq.topic", "topic", true, false, null);
                         Map<String, Object> args = new HashMap<String, Object>();
-                        args.put("max-length", 1);
+                        args.put("x-max-length", 1);
                         args.put("x-message-ttl", messageTtl);
                         channel.queueDeclare(queueName, false, false, false, args);
                         channel.queueBind(queueName, "amq.topic", queueName);
