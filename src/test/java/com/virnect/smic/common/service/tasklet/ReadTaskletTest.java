@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @SpringBootTest
 @Slf4j
+//@Execution(ExecutionMode.CONCURRENT)
 class ReadTaskletTest{
 
 	@Autowired
@@ -42,7 +45,7 @@ class ReadTaskletTest{
 	@Autowired
 	private Environment env;
 
-	@Test
+	//@Test
 	void concurrentConsumerTestWithDifferentQueue() throws IOException, TimeoutException, InterruptedException {
 		// given
 		int numberOfConsumers = Integer.parseInt(env.getProperty("mq.rabbitmq.num-consumer"));
@@ -89,22 +92,42 @@ class ReadTaskletTest{
 
 	}
 
-	@Test
+	//@Test
 	void concurrentConsumerTestWithDifferentQueue2() throws IOException, TimeoutException, InterruptedException {
 		// given
-		String queueName1 = "020_KIT_ZONE.EQUIPMENT.ENERGY.VOLTAGE.1";
-		String queueName2 = "020_KIT_ZONE.EQUIPMENT.ENERGY.VOLTAGE.2";
+		String queueName1 = "010_AGV_KIT.ANIMATION.RUNNING.KIT.1";
+		String queueName2 = "010_AGV_KIT.ANIMATION.RUNNING.KIT.1";
 
 		Channel channel1 =getChannel(queueName1);
 		Channel channel2 =getChannel(queueName2);
 
-		Consumer consumer1 = getConsumer(channel1);
-		Consumer consumer2 = getConsumer(channel2);
+		Consumer consumer1 = new DefaultConsumer(channel1) {
+			@Override
+			public void handleDelivery(
+				String consumerTag, Envelope envelope,
+				AMQP.BasicProperties properties, byte[] body
+			) throws IOException {
+				String message = new String(body, "UTF-8");
+				log.info("consumer1 "+ Thread.currentThread().getName() + " [x] Received '" + message + "'");
+			}
+		};
+		Consumer consumer2 = new DefaultConsumer(channel2) {
+			@Override
+			public void handleDelivery(
+				String consumerTag, Envelope envelope,
+				AMQP.BasicProperties properties, byte[] body
+			) throws IOException {
+				String message = new String(body, "UTF-8");
+				log.info("consumer2 "+ Thread.currentThread().getName() + " [x] Received '" + message + "'");
+			}
+		};
 
 		while(true){
 
 				try {
 					channel1.basicConsume(queueName1, true, consumer1);
+
+					//Thread.sleep(2000);
 					channel2.basicConsume(queueName2, true, consumer2);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -147,5 +170,22 @@ class ReadTaskletTest{
 		System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
 		return  channel;
+	}
+
+	//@Test
+	void publishTest() throws InterruptedException, IOException, TimeoutException {
+		String queueName = "010_AGV_KIT.ANIMATION.RUNNING.KIT.1";
+
+		int i=0;
+		while(true){
+			i++;
+			ConcurrentHashMap<String, String> result = new ConcurrentHashMap<>();
+			result.put(queueName, String.valueOf(i) );
+			readTasklet.publishAndLogAsync(result, "TEST001");
+			System.out.println("pub "+ queueName+","+ i);
+
+			Thread.sleep(500);
+		}
+
 	}
 }
