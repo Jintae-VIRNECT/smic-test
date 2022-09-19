@@ -38,24 +38,27 @@ public class RabbitMqQueueManager implements TopicManager{
         factory.setHost(env.getProperty("mq.rabbitmq.host"));
         factory.setPort(Integer.parseInt(env.getProperty("mq.rabbitmq.port")));
 
+        int numberOfConsumers = Integer.parseInt(env.getProperty("mq.rabbitmq.num-consumer"));
+        int messageTtl = Integer.parseInt(env.getProperty("mq.rabbitmq.expiration-ms"));
 
         try (Connection connection = factory.newConnection();
             Channel channel = connection.createChannel()) {
 
-            tags.forEach(queueName-> {
-
-                try {
-                    channel.exchangeDeclare("amq.topic", "topic", true, false, null);
-                    Map<String, Object> args = new HashMap<String, Object>();
-                    args.put("x-max-length", 1);
-                    //args.put("x-message-ttl", messageTtl);
-                    channel.queueDeclare(queueName, false, false, false, args);
-                    channel.queueBind(queueName, "amq.topic", queueName);
-                } catch (IOException e) {
-                    e.printStackTrace();
+            IntStream.range(1, numberOfConsumers+1).forEach(i ->
+                tags.forEach(queueName-> {
+                    queueName = String.format("%s.%d",queueName, i);
+                    try {
+                        channel.exchangeDeclare("amq.topic", "topic", true, false, null);
+                        Map<String, Object> args = new HashMap<String, Object>();
+                        args.put("x-max-length", 1);
+                        //args.put("x-message-ttl", messageTtl);
+                        channel.queueDeclare(queueName, false, false, false, args);
+                        channel.queueBind(queueName, "amq.topic", queueName);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-
+                )
             );
            // channel.close();
         }

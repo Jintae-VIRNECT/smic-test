@@ -29,6 +29,8 @@ public class RabbitMqProducerManager implements ProducerManager {
     private static Environment env;
     private static  AmqpTemplate template;
 
+    private int numberOfConsumers = 3;
+
     private AMQP.BasicProperties properties = null;
 
     @Autowired
@@ -36,7 +38,7 @@ public class RabbitMqProducerManager implements ProducerManager {
         this.env = env;
         try {
             producer = createRabbitMqChannel();
-
+            this.numberOfConsumers = Integer.parseInt(env.getProperty("mq.rabbitmq.num-consumer"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -59,13 +61,14 @@ public class RabbitMqProducerManager implements ProducerManager {
 
 
     public TaskletStatus runProducer(int _i, String queueName, String value) {
-
-        try {
-            producer.basicPublish("amq.topic", queueName, false, properties, value.getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        IntStream.range(1, numberOfConsumers+1).forEach(i->{
+            String queueNameWithNumber = String.format("%s.%d",queueName, i);
+            try {
+                producer.basicPublish("amq.topic", queueNameWithNumber, false, properties, value.getBytes(StandardCharsets.UTF_8));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
         return TaskletStatus.COMPLETED;
     }
 
