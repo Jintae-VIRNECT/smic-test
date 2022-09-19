@@ -109,9 +109,7 @@ public class ExecutionService extends BaseService {
 	@Transactional
 	Device registerDevice(String macAddress, Execution execution){
 
-		int sequenceNumber = deviceService.getDeviceSequenceNumber(execution.getId());
-
-		return deviceRepository.save(new Device(macAddress, execution, sequenceNumber));
+		return deviceRepository.save(new Device(macAddress, execution));
 	}
 
 	public ExecutionResource getStopExecutionResult (long executionId, long deviceId) {

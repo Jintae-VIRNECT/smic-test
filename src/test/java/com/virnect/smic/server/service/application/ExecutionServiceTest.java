@@ -125,7 +125,7 @@ class ExecutionServiceTest {
 		void get_StartExecutionResult_when_both_running_execution_and_device_exist() {
 
 			// given
-			Device device = new Device("temp123", executionStarted, 1);
+			Device device = new Device("temp123", executionStarted);
 			deviceRepository.save(device);
 
 			// when, then
@@ -148,9 +148,9 @@ class ExecutionServiceTest {
 			Execution execution = new Execution();
 			execution.setId(222222L);
 			runningExecution = executionRepository.save(execution);
-			Device device = new Device("temp123", runningExecution, 1);
+			Device device = new Device("temp123", runningExecution);
 			runningDevice = deviceRepository.save(device);
-			deviceRepository.save(new Device("temp456", runningExecution, 2));
+			deviceRepository.save(new Device("temp456", runningExecution));
 
 			// when
 			ExecutionResource result
@@ -173,10 +173,10 @@ class ExecutionServiceTest {
 			Execution execution = new Execution();
 			execution.setId(222222L);
 			runningExecution = executionRepository.save(execution);
-			Device stoppedDevice = new Device("temp456", runningExecution, 1);
+			Device stoppedDevice = new Device("temp456", runningExecution);
 			stoppedDevice.setExecutionStatus(ExecutionStatus.STOPPED);
 			deviceRepository.save(stoppedDevice);
-			runningDevice = deviceRepository.save(new Device("temp123", runningExecution, 2));
+			runningDevice = deviceRepository.save(new Device("temp123", runningExecution));
 
 			// when
 			ExecutionResource result
@@ -199,7 +199,7 @@ class ExecutionServiceTest {
 			Execution execution = new Execution();
 			execution.setId(222222L);
 			runningExecution = executionRepository.save(execution);
-			Device stoppedDevice = new Device("temp456", runningExecution, 1);
+			Device stoppedDevice = new Device("temp456", runningExecution);
 			stoppedDevice.setExecutionStatus(ExecutionStatus.STOPPED);
 			Device device = deviceRepository.save(stoppedDevice);
 

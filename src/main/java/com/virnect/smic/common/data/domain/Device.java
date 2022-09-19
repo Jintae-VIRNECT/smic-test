@@ -44,10 +44,9 @@ public class Device extends BaseTimeEntity{
 
 	private int sequenceNumber;
 
-	public Device(String macAddress, Execution execution, int sequenceNumber){
+	public Device(String macAddress, Execution execution){
 		this.macAddress = macAddress;
 		this.execution = execution;
-		this.sequenceNumber = sequenceNumber;
 		this.executionStatus = ExecutionStatus.STARTED;
 	}
 

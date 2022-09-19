@@ -89,13 +89,6 @@ public class DeviceService extends BaseService {
 		return deviceRepository.findByExecutionIdAndExecutionStatus(executionId, ExecutionStatus.STARTED);
 	}
 
-	int getDeviceSequenceNumber(long executionId) {
-		int numberOfRunningDevices =
-			deviceRepository.findByExecutionIdAndExecutionStatus(executionId, ExecutionStatus.STARTED).size();
-		int numberOfMaxConsumers = Integer.parseInt(env.getProperty("mq.rabbitmq.num-consumer"));
-		return (numberOfRunningDevices % numberOfMaxConsumers) + 1;
-	}
-
 	List<Device> getDevicesInExecution(long executionId){
 		return deviceRepository.findAllByExecutionId(executionId);
 	}

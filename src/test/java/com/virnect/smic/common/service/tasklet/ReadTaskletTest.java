@@ -13,9 +13,6 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @SpringBootTest
 @Slf4j
-//@Execution(ExecutionMode.CONCURRENT)
 class ReadTaskletTest{
 
 	@Autowired
@@ -108,7 +104,7 @@ class ReadTaskletTest{
 				AMQP.BasicProperties properties, byte[] body
 			) throws IOException {
 				String message = new String(body, "UTF-8");
-				log.info("consumer1 "+ Thread.currentThread().getName() + " [x] Received '" + message + "'");
+				System.out.println("consumer1 "+ Thread.currentThread().getName() + " [x] Received '" + message + "'");
 			}
 		};
 		Consumer consumer2 = new DefaultConsumer(channel2) {
@@ -118,7 +114,7 @@ class ReadTaskletTest{
 				AMQP.BasicProperties properties, byte[] body
 			) throws IOException {
 				String message = new String(body, "UTF-8");
-				log.info("consumer2 "+ Thread.currentThread().getName() + " [x] Received '" + message + "'");
+				System.out.println("consumer2 "+ Thread.currentThread().getName() + " [x] Received '" + message + "'");
 			}
 		};
 
@@ -145,7 +141,7 @@ class ReadTaskletTest{
 				AMQP.BasicProperties properties, byte[] body
 			) throws IOException {
 				String message = new String(body, "UTF-8");
-				log.info(Thread.currentThread().getName() + " [x] Received '" + message + "'");
+				System.out.println(Thread.currentThread().getName() + " [x] Received '" + message + "'");
 			}
 		};
 	}

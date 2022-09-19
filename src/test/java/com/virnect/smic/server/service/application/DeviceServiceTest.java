@@ -50,7 +50,7 @@ class DeviceServiceTest {
 		execution.setId(1L);
 
 		devices =
-			List.of(new Device("test1", execution, 1), new Device("test2", execution, 2));
+			List.of(new Device("test1", execution), new Device("test2", execution));
 	}
 
 	@BeforeEach
@@ -76,9 +76,9 @@ class DeviceServiceTest {
 		stopExecution.setId(1L);
 		stopExecution.setExecutionStatus(ExecutionStatus.STOPPED);
 
-		Device device = new Device("a", startExecution, 1);
+		Device device = new Device("a", startExecution);
 		when(deviceRepository.save(device))
-			.thenReturn(new Device("a", stopExecution, 1));
+			.thenReturn(new Device("a", stopExecution));
 		List<Device> devices = deviceService.updateAllDeviceStatusStopped(
 			List.of(device));
 
