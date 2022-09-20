@@ -38,7 +38,7 @@ import com.virnect.smic.server.service.application.OrderService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/orders")
-//@Tag(name="order", description="주문 API")
+
 public class OrderRestController {
 
 	private final OrderService orderService;
