@@ -1,15 +1,5 @@
 package com.virnect.smic.server.data.dto.response;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.server.core.EmbeddedWrapper;
-import org.springframework.hateoas.server.core.EmbeddedWrappers;
-
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-
 import com.virnect.smic.server.data.error.ErrorCode;
 
 import io.swagger.v3.oas.annotations.media.Schema;
