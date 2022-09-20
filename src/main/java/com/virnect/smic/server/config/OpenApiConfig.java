@@ -63,7 +63,6 @@ public class OpenApiConfig {
 	@Bean
 	public Docket api() {
 		return new Docket(DocumentationType.OAS_30)
-			//.enableUrlTemplating(true)
 			.ignoredParameterTypes(Errors.class)
 			.useDefaultResponseMessages(false)
 			.globalResponses(HttpMethod.GET, globalResponseMessage())
