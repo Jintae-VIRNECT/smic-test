@@ -1,11 +1,8 @@
 package com.virnect.smic.daemon.config;
 
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +11,6 @@ import java.util.List;
 
 import com.virnect.smic.common.config.ConfigurationException;
 import com.virnect.smic.common.data.dao.TagRepository;
-import com.virnect.smic.common.data.domain.Tag;
 import com.virnect.smic.common.data.dto.TagDto;
 import com.virnect.smic.daemon.config.support.SchedulingTaskLauncher;
 import com.virnect.smic.daemon.mq.TopicManager;
@@ -44,14 +40,6 @@ public class DaemonConfiguration {
 
 	private OpcUaClient client;
 
-
-	// public void initialize(long executionId) {
-	// 	try {
-	// 		launchTaskExecutor();
-	// 	} catch (Exception e) {
-	// 		throw new ConfigurationException(e);
-	// 	}
-	// }
 
 	//@EventListener(ApplicationReadyEvent.class)
 	public void launchTaskExecutor(long executionId) {
