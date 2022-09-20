@@ -3,7 +3,6 @@ package com.virnect.smic.daemon.mq.rabbitmq;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.IntStream;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
