@@ -28,8 +28,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/tasks")
-// @PropertySource("classpath:application.yml")
-// @ConditionalOnProperty(prefix="server",name="daemon", havingValue= "false")
 @ApiIgnore
 public class TaskRestController {
     private final TaskService taskService;
@@ -38,7 +36,6 @@ public class TaskRestController {
     private OpcUaClient client;
     @Operation(hidden = true)
     @GetMapping("{id}/tags/values")
-   // @Operation(summary="lookup tag value of task", description = "lookup tag values which belongs to provided task id")
     public ResponseEntity<EntityModel<ApiResponse<TagValueListResponse>>> getTaskTagValues(
         @PathVariable(name = "id") Long id
     ){
